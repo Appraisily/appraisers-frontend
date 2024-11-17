@@ -1,0 +1,50 @@
+# cloudbuild.yaml
+
+steps:
+  # Paso 1: Construir la imagen Docker del frontend
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build Frontend'
+    args:
+      - build
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA'
+      - '--build-arg'
+      - 'REACT_APP_BACKEND_URL=https://appraisers-backend-856401495068.us-central1.run.app' # URL del backend
+      - '.' # Ruta al directorio del frontend
+
+  # Paso 2: Empujar la imagen Docker al Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push Frontend'
+    args:
+      - push
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA'
+
+  # Paso 3: Desplegar la imagen a Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'Deploy Frontend'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'appraisers-frontend' # Nombre del servicio en Cloud Run
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA'
+      - '--region'
+      - 'us-central1' # Reemplaza con tu región si es diferente
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+  # Paso 4: Verificar la configuración de Nginx (Opcional)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Debug Frontend Nginx'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        docker run --rm -e PORT=8080 us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA cat /etc/nginx/conf.d/default.conf
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/appraisers-frontend:$SHORT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

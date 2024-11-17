@@ -1,0 +1,337 @@
+<!-- public/appraisal.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Complete Appraisal</title>
+    <style>
+      /* Reset margins and paddings */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Body Styles */
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f9f9f9;
+        color: #333333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      /* Main Container */
+      .container {
+        width: 100%;
+        max-width: 600px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 40px 30px;
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      /* Logo */
+      .logo {
+        margin-bottom: 20px;
+      }
+
+      .logo img {
+        width: 150px;
+        height: auto;
+      }
+
+      /* Title */
+      .title {
+        font-size: 24px;
+        color: #333333;
+        margin-bottom: 20px;
+      }
+
+      /* Form */
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      label {
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+
+      input[type="number"],
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      /* Submit Button */
+      .submit-button {
+        padding: 12px 24px;
+        background-color: #28a745;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      .submit-button:hover {
+        background-color: #218838;
+      }
+
+      /* Loader */
+      #loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+        display: none;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Success/Error Messages */
+      #message {
+        margin-top: 20px;
+        padding: 15px 20px;
+        border-radius: 4px;
+        display: none;
+        font-size: 16px;
+      }
+
+      #message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      #message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: auto;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #777777;
+      }
+
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* IA Description */
+      .ia-description {
+        margin-bottom: 20px;
+        text-align: left;
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 4px;
+      }
+
+      /* Responsive */
+      @media screen and (max-width: 600px) {
+        .container {
+          padding: 20px 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Logo -->
+      <div class="logo">
+        <a href="https://www.appraisily.com/" target="_blank">
+          <img src="https://www.appraisily.com/wp-content/uploads/2023/12/cropped-appraisily.com_a_logo_for_an_online_art_and_antiques_appraisal__a8888b1f-2dbb-479e-9833-09c6263f0892.webp" alt="Appraisily Logo">
+        </a>
+      </div>
+
+      <!-- Title -->
+      <div class="title">Complete Appraisal</div>
+
+      <!-- IA Description -->
+      <div id="ia-description" class="ia-description"></div>
+
+      <!-- Success/Error Messages -->
+      <div id="message"></div>
+
+      <!-- Appraisal Completion Form -->
+      <form id="appraisal-form">
+        <label for="appraisalValue">Appraisal Value ($):</label>
+        <input type="number" id="appraisalValue" name="appraisalValue" required min="0" step="0.01" />
+
+        <label for="description">Item Description:</label>
+        <textarea id="description" name="description" required></textarea>
+
+        <button type="submit" class="submit-button">Send</button>
+      </form>
+
+      <!-- Loader -->
+      <div id="loader"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      © <span id="current-year"></span> Appraisily. All rights reserved.
+    </div>
+
+    <script>
+      // Update the current year in the footer
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+
+      // Function to show messages
+      function showMessage(type, text) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.className = type === 'success' ? 'success' : 'error';
+        messageDiv.innerText = text;
+        messageDiv.style.display = 'block';
+      }
+
+      // Function to hide messages
+      function hideMessage() {
+        const messageDiv = document.getElementById('message');
+        messageDiv.style.display = 'none';
+      }
+
+      // Get the appraisal ID from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const appraisalId = urlParams.get('id');
+
+      if (!appraisalId) {
+        alert('Appraisal ID not provided.');
+        window.location.href = 'index.html';
+      }
+
+      // Function to load appraisal details
+      function loadAppraisalDetails() {
+        // Show the loader while fetching details
+        document.getElementById('loader').style.display = 'block';
+        hideMessage();
+
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+          showMessage('error', 'You are not authenticated. Please log in.');
+          return;
+        }
+
+        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
+          headers: {
+            'Authorization': `Bearer ${jwtToken}`
+          }
+        })
+        .then(res => {
+          // Hide the loader after receiving the response
+          document.getElementById('loader').style.display = 'none';
+
+          if (res.status === 401) {
+            throw new Error('Unauthorized. Please log in again.');
+          } else if (res.status === 403) {
+            throw new Error('Forbidden. You do not have permission to view this content.');
+          } else if (res.status === 404) {
+            throw new Error('Appraisal not found.');
+          }
+          return res.json();
+        })
+        .then(data => {
+          // Display IA Description
+          const iaDescriptionDiv = document.getElementById('ia-description');
+          iaDescriptionDiv.innerText = `IA Description: ${data.iaDescription}`;
+          iaDescriptionDiv.style.display = 'block';
+
+          showMessage('success', 'Appraisal details loaded successfully.');
+        })
+        .catch(err => {
+          console.error('Error fetching appraisal details:', err);
+          showMessage('error', err.message || 'Error fetching appraisal details.');
+        });
+      }
+
+      // Function to handle form submission
+      document.getElementById('appraisal-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const appraisalValue = document.getElementById('appraisalValue').value;
+        const description = document.getElementById('description').value;
+
+        // Show the loader while submitting
+        document.getElementById('loader').style.display = 'block';
+        hideMessage();
+
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+          showMessage('error', 'You are not authenticated. Please log in.');
+          return;
+        }
+
+        fetch(`https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/${appraisalId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`
+          },
+          body: JSON.stringify({ appraisalValue, description })
+        })
+        .then(res => res.json())
+        .then(data => {
+          // Hide the loader after receiving the response
+          document.getElementById('loader').style.display = 'none';
+          
+          if (data.success) {
+            showMessage('success', 'Appraisal completed successfully.');
+            // Optionally, redirect back to the dashboard after a delay
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 2000);
+          } else {
+            showMessage('error', data.message || 'Error completing the appraisal.');
+          }
+        })
+        .catch(err => {
+          // Hide the loader in case of error
+          document.getElementById('loader').style.display = 'none';
+          console.error('Error completing the appraisal:', err);
+          showMessage('error', 'Error completing the appraisal. Please try again.');
+        });
+      });
+
+      // Load appraisal details on page load
+      window.onload = () => {
+        loadAppraisalDetails();
+      };
+    </script>
+  </body>
+</html>

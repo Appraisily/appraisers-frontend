@@ -1,0 +1,85 @@
+.appraisal-form-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 32px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.appraisal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.form-group input[type="number"] {
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.form-group input[type="number"]:focus {
+  border-color: #3b82f6;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  min-height: 150px;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.form-group textarea:focus {
+  border-color: #3b82f6;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.submit-button {
+  align-self: center;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background-color: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 16px;
+}
+
+.submit-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}

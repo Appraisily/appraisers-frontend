@@ -1,0 +1,63 @@
+.appraisal-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 24px;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 32px auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 16px 0;
+  font-size: 16px;
+}
+
+.message.error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.message.success {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.descriptions-container {
+  margin-bottom: 40px;
+}
+
+.description-section {
+  margin-bottom: 24px;
+}
+
+.description-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.description-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #475569;
+  white-space: pre-wrap;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}

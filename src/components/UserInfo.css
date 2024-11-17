@@ -1,0 +1,33 @@
+/* UserInfo.css */
+.logout-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  color: #d9534f;
+  border: 2px solid #d9534f;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  z-index: 1001;
+}
+
+.logout-button:hover {
+  background-color: #d9534f;
+  color: #ffffff;
+}
+
+.user-name {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  color: #28a745;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 1001;
+}

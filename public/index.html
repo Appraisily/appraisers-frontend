@@ -1,0 +1,632 @@
+<!-- public/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Appraisers Dashboard</title>
+  <!-- Load Google Identity Services library -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Link to the external CSS file -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <style>
+    /* Estilos para el contenedor de controles */
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .buttons-container button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .buttons-container button.pending {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .buttons-container button.pending:hover {
+      background-color: #45a049;
+    }
+
+    .buttons-container button.completed {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .buttons-container button.completed:hover {
+      background-color: #0b7dda;
+    }
+
+    .buttons-container button.search {
+      background-color: #FFC107;
+      color: white;
+    }
+
+    .buttons-container button.search:hover {
+      background-color: #e0a800;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-container input[type="text"] {
+      padding: 5px;
+      font-size: 14px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    /* Estilos para la tabla */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #f2f2f2;
+    }
+
+    /* Estilos para mensajes */
+    .success {
+      color: green;
+      margin-bottom: 10px;
+    }
+
+    .error {
+      color: red;
+      margin-bottom: 10px;
+    }
+
+    /* Estilos para el loader */
+    #loader {
+      display: none;
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 2s linear infinite;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Estilos para el footer */
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #888;
+    }
+
+    /* Estilos para la visualización del nombre de usuario */
+    .user-name {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    /* Estilos para botones de acción */
+    .action-button {
+      padding: 5px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .action-button.complete {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .action-button.complete:hover {
+      background-color: #45a049;
+    }
+
+    .action-button.edit {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .action-button.edit:hover {
+      background-color: #0b7dda;
+    }
+  </style>
+  
+</head>
+<body>
+  <!-- Logout Button -->
+  <button id="logout-button" class="logout-button" style="display: none;">Logout</button>
+
+  <!-- Div to display the user's name -->
+  <div id="user-name" class="user-name" style="display: none;"></div>
+  
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo">
+      <a href="https://www.appraisily.com/" target="_blank">
+        <img src="https://www.appraisily.com/wp-content/uploads/2023/12/cropped-appraisily.com_a_logo_for_an_online_art_and_antiques_appraisal__a8888b1f-2dbb-479e-9833-09c6263f0892.webp" alt="Appraisily Logo">
+      </a>
+    </div>
+
+    <!-- Title -->
+    <div class="title">Welcome to the Appraisers Dashboard</div>
+
+    <!-- Success/Error Messages -->
+    <div id="message"></div>
+
+   <div class="signin-container">
+    <div id="g_id_onload"
+        data-client_id="856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+    </div>
+    <div id="g_id_signin" class="g_id_signin"
+        data-type="standard"
+        data-shape="rectangular"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-size="large"
+        data-logo_alignment="left">
+    </div>
+</div>
+
+
+    <!-- Loader -->
+    <div id="loader"></div>
+
+    <!-- Appraisals Container -->
+    <div id="appraisals"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    © <span id="current-year"></span> Appraisily. All rights reserved.
+  </div>
+
+  <script>
+    // Actualizar el año en el footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Función para mostrar mensajes
+    function showMessage(type, text) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = type === 'success' ? 'success' : 'error';
+      messageDiv.innerText = text;
+      messageDiv.style.display = 'block';
+    }
+
+    // Función para ocultar mensajes
+    function hideMessage() {
+      const messageDiv = document.getElementById('message');
+      messageDiv.style.display = 'none';
+    }
+
+    // Definir la URL base de la API
+    const API_BASE_URL = 'https://appraisers-backend-856401495068.us-central1.run.app/api'; // URL de tu backend
+
+    // Manejar la respuesta de Google Sign-In
+    function handleCredentialResponse(response) {
+      const idToken = response.credential;
+      console.log("ID Token:", idToken);
+      
+      // Mostrar el loader durante la autenticación
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+      
+      // Enviar el ID token al backend para verificación y emisión de JWT
+      fetch(`${API_BASE_URL}/authenticate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ idToken }),
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => {
+        // Verificar si la respuesta es JSON
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          // Si no es JSON, devolver texto para manejo de errores
+          return res.text().then(text => { throw new Error(text); });
+        }
+      })
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (data.success) {
+          // Almacenar el nombre del usuario
+          const userName = data.name;
+          localStorage.setItem('userName', data.name);
+
+          // Mostrar el botón de cierre de sesión y ocultar el de inicio de sesión
+          document.getElementById('logout-button').style.display = 'block';
+          document.getElementById('g_id_signin').style.display = 'none';
+
+          // Mostrar el nombre del usuario
+          showUserName(userName);
+
+          // Mostrar un mensaje de éxito
+          showMessage('success', 'Authentication successful. Loading appraisals...');
+          // Cargar las apreciaciones
+          loadAppraisals(currentAppraisalType);
+        } else {
+          // Manejar el fallo en la autenticación
+          showMessage('error', data.message || 'Authentication failed. Please try again.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error during authentication:', err);
+        showMessage('error', 'Error during authentication. Please try again.');
+      });
+    }
+
+    // Función para mostrar el nombre del usuario
+    function showUserName(name) {
+      const userNameDiv = document.getElementById('user-name');
+      userNameDiv.textContent = `Logged in as ${name}`;
+      userNameDiv.style.display = 'block';
+    }
+
+    // Variables para almacenar datos de apreciaciones
+    let allAppraisals = [];
+    let currentAppraisalType = 'pending'; // Puede ser 'pending' o 'completed'
+
+    // Función para cargar apreciaciones desde el backend
+    function loadAppraisals(appraisalType) {
+      // Mostrar el loader mientras se obtienen las apreciaciones
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+
+      // Determinar el endpoint basado en el tipo de apreciación
+      let endpoint = `${API_BASE_URL}/appraisals`;
+      if (appraisalType === 'completed') {
+        endpoint = `${API_BASE_URL}/appraisals/completed`;
+      }
+
+      fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
+
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          return res.text().then(text => { throw new Error(text); });
+        }
+      })
+      .then(data => {
+        allAppraisals = data; // Almacenar todos los datos de apreciaciones
+
+        // Renderizar la tabla de apreciaciones
+        renderAppraisalsTable(allAppraisals, appraisalType);
+
+        showMessage('success', 'Appraisals loaded successfully.');
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error fetching appraisals:', err);
+        showMessage('error', err.message || 'Error fetching appraisals.');
+
+        // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('g_id_signin').style.display = 'block';
+
+        // Limpiar las apreciaciones
+        document.getElementById('appraisals').innerHTML = '';
+      });
+    }
+
+    // Función para renderizar la tabla de apreciaciones
+    function renderAppraisalsTable(appraisals, appraisalType) {
+      const appraisalsDiv = document.getElementById('appraisals');
+
+      // Limpiar contenido previo
+      appraisalsDiv.innerHTML = '';
+
+      // Crear el contenedor de controles (botones y búsqueda)
+      const controlsContainer = document.createElement('div');
+      controlsContainer.className = 'controls-container';
+
+      // Crear contenedor de botones
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'buttons-container';
+
+      // Crear botón para Pending
+      const pendingButton = document.createElement('button');
+      pendingButton.className = 'pending';
+      pendingButton.textContent = 'Mostrar Pending';
+      pendingButton.id = 'show-pending';
+
+      // Crear botón para Completed
+      const completedButton = document.createElement('button');
+      completedButton.className = 'completed';
+      completedButton.textContent = 'Mostrar Completed';
+      completedButton.id = 'show-completed';
+
+      // Añadir botones al contenedor de botones
+      buttonsContainer.appendChild(pendingButton);
+      buttonsContainer.appendChild(completedButton);
+
+      // Crear contenedor de búsqueda
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'search-container';
+
+      // Crear input de búsqueda
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.id = 'search-input';
+      searchInput.placeholder = 'Search...';
+
+      // Crear botón de búsqueda
+      const searchButton = document.createElement('button');
+      searchButton.className = 'search';
+      searchButton.textContent = 'Buscar';
+      searchButton.id = 'search-button';
+
+      // Añadir input y botón al contenedor de búsqueda
+      searchContainer.appendChild(searchInput);
+      searchContainer.appendChild(searchButton);
+
+      // Añadir botones y búsqueda al contenedor de controles
+      controlsContainer.appendChild(buttonsContainer);
+      controlsContainer.appendChild(searchContainer);
+
+      // Añadir el contenedor de controles al div de apreciaciones
+      appraisalsDiv.appendChild(controlsContainer);
+
+      // Crear la tabla
+      let tableHTML = `
+        <table id="appraisals-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Appraisal Type</th>
+              <th>Appraisal Number</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      if (appraisals.length === 0) {
+        tableHTML += `
+          <tr>
+            <td colspan="5">No appraisals found.</td>
+          </tr>
+        `;
+      } else {
+        appraisals.forEach(appraisal => {
+          tableHTML += `
+            <tr>
+              <td data-label="Date">${appraisal.date}</td>
+              <td data-label="Appraisal Type">${appraisal.appraisalType}</td>
+              <td data-label="Appraisal Number" title="${appraisal.identifier}">
+                ${appraisal.identifier}
+              </td>
+              <td data-label="Status">${appraisal.status}</td>
+              <td data-label="Action">
+          `;
+
+          if (appraisalType === 'pending') {
+            tableHTML += `
+                <button class="action-button complete" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Complete</button>
+            `;
+          } else if (appraisalType === 'completed') {
+            tableHTML += `
+                <button class="action-button edit" data-id="${appraisal.id}" data-url="${appraisal.wordpressUrl}">Edit</button>
+            `;
+          }
+
+          tableHTML += `
+            </td>
+          </tr>
+        `;
+        });
+      }
+
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
+      // Añadir la tabla al div de apreciaciones
+      appraisalsDiv.innerHTML += tableHTML;
+
+      // Añadir event listeners a los botones de acción
+      document.querySelectorAll('.action-button').forEach(button => {
+        button.addEventListener('click', () => {
+          const appraisalId = button.getAttribute('data-id');
+          const wordpressUrl = button.getAttribute('data-url');
+
+          if (appraisalType === 'pending') {
+            // Redireccionar a la página de completado de apreciación con parámetros
+            window.location.href = `appraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          } else if (appraisalType === 'completed') {
+            // Redireccionar a la página de edición de apreciación con parámetros
+            window.location.href = `editAppraisal.html?id=${appraisalId}&wpUrl=${encodeURIComponent(wordpressUrl)}`;
+          }
+        });
+      });
+
+      // Añadir event listeners a los nuevos botones
+      document.getElementById('show-pending').addEventListener('click', () => {
+        currentAppraisalType = 'pending';
+        loadAppraisals('pending');
+      });
+
+      document.getElementById('show-completed').addEventListener('click', () => {
+        currentAppraisalType = 'completed';
+        loadAppraisals('completed');
+      });
+
+      // Añadir event listener al botón de búsqueda
+      document.getElementById('search-button').addEventListener('click', () => {
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        if (query === '') {
+          showMessage('error', 'Please enter a search query.');
+          return;
+        }
+        filterAppraisalsTable(query, appraisalType);
+      });
+    }
+
+    // Función para filtrar la tabla de apreciaciones según la consulta de búsqueda
+    function filterAppraisalsTable(query, appraisalType) {
+      const filteredAppraisals = allAppraisals.filter(appraisal => {
+        // Verificar si alguno de los campos contiene la consulta
+        return (
+          (appraisal.date && appraisal.date.toLowerCase().includes(query)) ||
+          (appraisal.appraisalType && appraisal.appraisalType.toLowerCase().includes(query)) ||
+          (appraisal.identifier && appraisal.identifier.toLowerCase().includes(query)) ||
+          (appraisal.status && appraisal.status.toLowerCase().includes(query))
+        );
+      });
+
+      if (filteredAppraisals.length === 0) {
+        showMessage('error', 'No appraisals match your search.');
+      } else {
+        showMessage('success', `${filteredAppraisals.length} appraisal(s) found.`);
+      }
+
+      // Renderizar la tabla con las apreciaciones filtradas
+      renderAppraisalsTable(filteredAppraisals, appraisalType);
+    }
+
+    // Función para manejar el cierre de sesión
+    function logout() {
+      // Mostrar el loader mientras se cierra sesión
+      document.getElementById('loader').style.display = 'block';
+      hideMessage();
+
+      fetch(`${API_BASE_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include' // Incluir cookies en la solicitud
+      })
+      .then(res => {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        } else {
+          return res.text().then(text => { throw new Error(text); });
+        }
+      })
+      .then(data => {
+        // Ocultar el loader después de recibir la respuesta
+        document.getElementById('loader').style.display = 'none';
+        
+        if (data.success) {
+          // Mostrar el botón de inicio de sesión y ocultar el de cierre de sesión
+          document.getElementById('g_id_signin').style.display = 'block';
+          document.getElementById('logout-button').style.display = 'none';
+          
+          // Eliminar el nombre del usuario del localStorage
+          localStorage.removeItem('userName');
+          
+          // Ocultar la visualización del nombre del usuario
+          document.getElementById('user-name').style.display = 'none';
+
+          // Limpiar las apreciaciones
+          document.getElementById('appraisals').innerHTML = '';
+          // Mostrar un mensaje de éxito
+          showMessage('success', 'Successfully logged out.');
+        } else {
+          // Manejar el fallo en el cierre de sesión
+          showMessage('error', 'Error logging out. Please try again.');
+        }
+      })
+      .catch(err => {
+        // Ocultar el loader en caso de error
+        document.getElementById('loader').style.display = 'none';
+        console.error('Error during logout:', err);
+        showMessage('error', 'Error logging out. Please try again.');
+      });
+    }
+
+    // Añadir event listener al botón de cierre de sesión
+    document.getElementById('logout-button').addEventListener('click', logout);
+
+    // Verificar el estado de autenticación al cargar la página
+    window.onload = () => {
+      // Verificar si el nombre del usuario está en el localStorage
+      const userName = localStorage.getItem('userName');
+      
+      if (userName) {
+        // Mostrar el botón de cierre de sesión y ocultar el de inicio de sesión
+        document.getElementById('logout-button').style.display = 'block';
+        document.getElementById('g_id_signin').style.display = 'none';
+
+        // Mostrar la visualización del nombre del usuario
+        showUserName(userName);
+
+        // Cargar las apreciaciones (pendientes por defecto)
+        loadAppraisals(currentAppraisalType);
+      } else {
+        // Usuario no autenticado
+        document.getElementById('logout-button').style.display = 'none';
+        document.getElementById('g_id_signin').style.display = 'block';
+      }
+    };
+
+// Scroll bara dashboard
+    window.addEventListener('scroll', function() {
+        const title = document.querySelector('.dashboard-title');
+        if (window.scrollY > 50) {  // Ajusta el valor según el punto en que quieres que ocurra el cambio
+            title.classList.add('scrolled');
+        } else {
+            title.classList.remove('scrolled');
+        }
+    });
+
+
+  
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+/* src/Error.css */
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  background-color: #ffe6e6;
+  color: #cc0000;
+}
+
+.error-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.error-container p {
+  font-size: 1.2rem;
+}

@@ -1,0 +1,47 @@
+.field-name {
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+.field-value {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  resize: none;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.field-value:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+textarea.field-value {
+  min-height: 80px;
+  max-height: 300px;
+}
+
+.edit-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: center;
+  margin-top: 10px;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}

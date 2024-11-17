@@ -1,0 +1,502 @@
+/* css/styles.css */
+
+/* Reset margins and paddings */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
+  color: #333333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative; /* For positioning the logout button */
+}
+
+/* Main Container */
+.container {
+  width: 100%;
+  max-width: 800px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 40px 30px;
+  text-align: center;
+  margin-top: 50px;
+  position: relative; /* Added line */
+}
+
+/* Back Button Styles */
+.back-button {
+  position: absolute;
+  top: 20px; /* Adjust as needed */
+  left: 20px; /* Position in the top-left corner */
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 500;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+/* Logo */
+.logo {
+  margin-bottom: 20px;
+}
+
+.logo img {
+  width: 120px; /* Reduced logo size */
+  height: auto;
+}
+
+/* Title */
+.title {
+  font-size: 24px;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+/* Dashboard Title Styles */
+.dashboard-title {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: #333333;
+    background-color: transparent;
+    z-index: 1000;
+    transition: background-color 0.3s ease, width 0.3s ease, left 0.3s ease;
+    padding: 10px 0;
+}
+.dashboard-title.scrolled {
+    width: 100%;  /* Ocupa el 100% del ancho */
+    left: 0;  /* Alineado a la izquierda */
+    transform: none;  /* Anula el translateX */
+    background-color: rgba(255, 255, 255, 0.8);  /* Fondo blanco con transparencia */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);  /* Sombra opcional para mayor contraste */
+    padding: 10px 20px;  /* Ajustar el padding si es necesario */
+}
+
+
+/* Estilos para el contenedor del botón Google Sign-In */
+.signin-container {
+    display: flex;
+    justify-content: center;   /* Centra horizontalmente */
+    align-items: center;       /* Centra verticalmente */
+    margin-top: 20px;         /* Ajusta el espaciado superior si es necesario */
+  height: 5vh;  
+      width: 100%;                /* Ocupa todo el ancho del contenedor padre */
+
+}
+
+/* Ajuste del botón de Google Sign-In */
+.g_id_signin {
+   display: flex;
+    justify-content: center;    /* Centra el contenido dentro del botón */
+    align-items: center;        /* Alinea verticalmente el contenido */
+    width: 100%;                /* Ocupa todo el ancho del contenedor */
+    max-width: 400px;           /* Establece un ancho máximo para el botón */
+    margin: 0 auto;             /* Asegura que el botón esté centrado */
+    padding: 10px;              /* Opcional: Añadir padding si es necesario */
+
+}
+
+/* Opcional: mejora del estilo de la imagen de cuenta */
+.g_id_signin img {
+    border-radius: 50%;        /* Hace la imagen de la cuenta redonda */
+    width: 40px;               /* Tamaño personalizado para la imagen */
+    margin-right: 10px;        /* Espaciado entre la imagen y el texto */
+}
+
+
+
+/* Logout Button */
+#logout-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  color: #d9534f;
+  border: 2px solid #d9534f;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: none;
+  z-index: 1000;
+}
+
+#logout-button:hover {
+  background-color: #d9534f;
+  color: #ffffff;
+}
+
+/* Loader */
+#loader-container {
+  display: none; /* Initially hidden */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 2000;
+}
+
+#loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+#loader-message {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333333;
+}
+
+/* Animación del Loader */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success/Error Messages */
+#message {
+  margin-top: 20px;
+  padding: 15px 20px;
+  border-radius: 4px;
+  display: none;
+  font-size: 16px;
+}
+
+#message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+#message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Appraisals Table */
+#appraisals {
+  margin-top: 30px;
+  width: 100%;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  margin-bottom: 20px;
+  table-layout: fixed; /* Allows fixed column widths */
+}
+
+th, td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: center; /* Center-align table cells */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px; /* Reduced font size */
+}
+
+th {
+  background-color: #f4f4f4;
+  color: #333333;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Adjust column widths */
+table th:nth-child(1),
+table td:nth-child(1) {
+  width: 15%; /* Date */
+}
+
+table th:nth-child(2),
+table td:nth-child(2) {
+  width: 20%; /* Appraisal Type */
+}
+
+table th:nth-child(3),
+table td:nth-child(3) {
+  width: 15%; /* Appraisal Number */
+}
+
+table th:nth-child(4),
+table td:nth-child(4) {
+  width: 30%; /* Status */
+}
+
+table th:nth-child(5),
+table td:nth-child(5) {
+  width: 20%; /* Action */
+}
+
+/* Allow full text in the 'Status' column */
+td[data-label="Status"] {
+  white-space: normal; /* Allow text to wrap */
+  overflow: visible;
+  text-overflow: initial;
+  font-size: 12px; /* Reduced font size for status */
+}
+
+/* Center the 'Action' button */
+td[data-label="Action"] {
+  text-align: center;
+}
+
+/* Responsive Table */
+@media screen and (max-width: 600px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  th {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+    text-align: left;
+  }
+
+  td:before {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    content: attr(data-label);
+    color: #555555;
+  }
+
+  /* Adjustments for mobile view */
+  td[data-label="Status"] {
+    white-space: normal;
+    font-size: 14px;
+  }
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  padding: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: #777777;
+}
+
+.footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Action Button */
+.action-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.action-button:hover {
+  background-color: #0056b3;
+}
+
+/* Styles for user name display */
+.user-name {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  color: #28a745;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+/* Rectangle for Step Messages */
+.step-messages {
+  width: 100%;
+  max-width: 600px;
+  border: 2px solid #000; /* Borde negro */
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 20px;
+  height: 60px; /* Altura fija para mantener la consistencia */
+  overflow: hidden;
+  position: relative;
+  background-color: #f9f9f9;
+
+  /* Flexbox para centrar el contenido */
+  display: flex;
+  align-items: center;      /* Centra verticalmente */
+  justify-content: center;  /* Centra horizontalmente */
+}
+
+/* Individual Step Message */
+.step-message {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: transform 0.5s ease, opacity 0.5s ease;
+
+  /* Flexbox para centrar el texto */
+  display: flex;
+  align-items: center;      /* Centra verticalmente */
+  justify-content: center;  /* Centra horizontalmente */
+  text-align: center;       /* Asegura que el texto está centrado */
+}
+
+.step-message.active {
+  opacity: 1;
+  transform: translateY(0);
+  /* Animación opcional */
+  animation: fadeIn 0.5s forwards;
+}
+
+.step-message.completed,
+.step-message.failed {
+  opacity: 0;
+  transform: translateY(-20px);
+  /* Animación opcional */
+  animation: fadeOut 0.5s forwards;
+}
+
+/* Animaciones Opcionales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Dots for Steps */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.progress-dots .dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #cccccc;
+  transition: background-color 0.3s ease;
+}
+
+.progress-dots .dot.active {
+  background-color: #007bff;
+}
+
+.progress-dots .dot.completed {
+  background-color: #28a745;
+}
+
+.progress-dots .dot.failed {
+  background-color: #dc3545;
+}
+
+/* Opcional: Tooltip con Descripción al Pasar el Cursor */
+.progress-dots .dot::after {
+  content: attr(data-description);
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: none;
+  z-index: 100;
+}
+
+.progress-dots .dot:hover::after {
+  display: block;
+}
