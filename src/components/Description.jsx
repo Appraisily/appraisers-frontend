@@ -1,22 +1,30 @@
 import React from 'react';
-import './Description.css';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Description = ({ customerDescription, iaDescription }) => {
   return (
-    <div className="descriptions-container">
-      <div id="customer-description">
-        <div className="description-title">Customer Description:</div>
-        <div className="description-text">
-          {customerDescription || 'Not available'}
-        </div>
-      </div>
+    <div className="space-y-6">
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Customer Description</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            {customerDescription || 'Not available'}
+          </p>
+        </CardContent>
+      </Card>
 
-      <div id="ia-description">
-        <div className="description-title">AI Description:</div>
-        <div className="description-text">
-          {iaDescription || 'Not available'}
-        </div>
-      </div>
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-lg">AI Description</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+            {iaDescription || 'Not available'}
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

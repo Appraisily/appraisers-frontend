@@ -1,42 +1,44 @@
 import React from 'react';
-import './Controls.css';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { RefreshCw } from "lucide-react";
 
 const Controls = ({ onPendingClick, onCompletedClick, onSearch, onRefresh, isRefreshing }) => {
   return (
-    <div className="controls-container">
-      <div className="buttons-container">
-        <button className="pending" onClick={onPendingClick}>
+    <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          onClick={onPendingClick}
+          className="bg-green-600 hover:bg-green-700"
+        >
           Pending
-        </button>
-        <button className="completed" onClick={onCompletedClick}>
+        </Button>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={onCompletedClick}
+        >
           Completed
-        </button>
-        <button 
-          className={`refresh-button ${isRefreshing ? 'spinning' : ''}`}
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
           onClick={onRefresh}
           disabled={isRefreshing}
-          aria-label="Refresh appraisals list"
+          className="h-8 w-8"
           title="Refresh list"
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-          </svg>
-        </button>
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
-      <div className="search-container">
-        <input
+      <div className="relative">
+        <Input
           type="text"
-          id="search-input"
-          placeholder="Search..."
+          placeholder="Search appraisals..."
           onChange={(e) => onSearch(e.target.value)}
+          className="w-[250px] h-8"
         />
       </div>
     </div>

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { completeAppraisal } from '../services/appraisals';
-import './AppraisalForm.css';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const AppraisalForm = ({ appraisalId, onSuccess }) => {
   const [appraisalValue, setAppraisalValue] = useState('');
@@ -45,19 +50,27 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
   };
 
   return (
-    <div className="appraisal-form-container">
-      <form className="appraisal-form" onSubmit={handleSubmit}>
-        {error && (
-          <div className="error-message" role="alert">
-            {error}
-          </div>
-        )}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold tracking-tight">Complete Appraisal</h2>
+        <p className="text-sm text-muted-foreground">
+          Enter the appraisal details below to complete the process.
+        </p>
+      </div>
 
-        <div className="form-group">
-          <label htmlFor="appraisalValue">Appraisal Value ($)</label>
-          <input
-            type="number"
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="appraisalValue">Appraisal Value ($)</Label>
+          <Input
             id="appraisalValue"
+            type="number"
             value={appraisalValue}
             onChange={(e) => setAppraisalValue(e.target.value)}
             required
@@ -68,27 +81,28 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="description">Item Description</label>
-          <textarea
+        <div className="space-y-2">
+          <Label htmlFor="description">Item Description</Label>
+          <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
             placeholder="Enter detailed item description"
             disabled={isSubmitting}
+            className="min-h-[150px] resize-y"
           />
         </div>
 
-        <button 
+        <Button 
           type="submit" 
-          className="submit-button"
+          className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Processing...' : 'Submit Appraisal'}
-        </button>
-      </form>
-    </div>
+          {isSubmitting ? "Processing..." : "Submit Appraisal"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

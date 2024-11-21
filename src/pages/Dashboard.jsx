@@ -9,6 +9,7 @@ import AppraisalsTable from '../components/AppraisalsTable';
 import LoginForm from '../components/LoginForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -66,44 +67,65 @@ const Dashboard = () => {
 
   if (!userName) {
     return (
-      <div className="login-container">
-        <div className="login-box">
-          <Logo size="medium" />
-          <div className="welcome-text">
-            <h1>Welcome to Appraisers Dashboard</h1>
-            <p>Please sign in to continue</p>
-          </div>
-          <LoginForm />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+        <div className="w-full max-w-md space-y-8">
+          <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+            <CardHeader className="space-y-4 flex flex-col items-center pb-8">
+              <div className="flex flex-col items-center gap-4">
+                <Logo size="large" />
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  Appraisily
+                </h1>
+              </div>
+              <div className="space-y-2 text-center">
+                <CardTitle className="text-lg font-semibold tracking-tight">
+                  Welcome to Appraisers Dashboard
+                </CardTitle>
+                <CardDescription className="text-slate-600">
+                  Sign in to manage your appraisals
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <LoginForm />
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard">
+    <div className="min-h-screen bg-background">
       <Header />
-      {loading && <LoadingSpinner message="Loading appraisals..." />}
       
-      {error && (
-        <div className="message error">
-          {error}
+      <main className="container mx-auto px-4 py-8 relative">
+        {error && (
+          <div className="p-4 mb-4 text-sm text-red-500 bg-red-50 rounded-lg border border-red-200">
+            {error}
+          </div>
+        )}
+
+        <Controls
+          onPendingClick={() => setCurrentAppraisalType('pending')}
+          onCompletedClick={() => setCurrentAppraisalType('completed')}
+          onSearch={handleSearch}
+          isRefreshing={loading}
+          onRefresh={() => loadAppraisals(currentAppraisalType)}
+        />
+
+        <div className="relative">
+          <AppraisalsTable
+            appraisals={appraisalsList}
+            currentAppraisalType={currentAppraisalType}
+            onActionClick={(id, url) => {
+              const path = currentAppraisalType === 'pending' ? '/appraisal' : '/edit-appraisal';
+              navigate(`${path}?id=${id}&wpUrl=${encodeURIComponent(url)}`);
+            }}
+          />
+          {loading && <LoadingSpinner />}
         </div>
-      )}
-
-      <Controls
-        onPendingClick={() => setCurrentAppraisalType('pending')}
-        onCompletedClick={() => setCurrentAppraisalType('completed')}
-        onSearch={handleSearch}
-      />
-
-      <AppraisalsTable
-        appraisals={appraisalsList}
-        currentAppraisalType={currentAppraisalType}
-        onActionClick={(id, url) => {
-          const path = currentAppraisalType === 'pending' ? '/appraisal' : '/edit-appraisal';
-          navigate(`${path}?id=${id}&wpUrl=${encodeURIComponent(url)}`);
-        }}
-      />
+      </main>
 
       <Footer />
     </div>

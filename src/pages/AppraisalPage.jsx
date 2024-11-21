@@ -8,9 +8,10 @@ import AppraisalForm from '../components/AppraisalForm';
 import Description from '../components/Description';
 import LoadingSpinner from '../components/LoadingSpinner';
 import BackButton from '../components/BackButton';
-import UserInfo from '../components/UserInfo';
 import { ENDPOINTS } from '../config/endpoints';
-import './AppraisalPage.css';
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 const AppraisalPage = () => {
   const [searchParams] = useSearchParams();
@@ -20,7 +21,6 @@ const AppraisalPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
-  const userName = localStorage.getItem('userName');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -78,42 +78,55 @@ const AppraisalPage = () => {
   if (!appraisalId) return null;
 
   return (
-    <div className="appraisal-page">
+    <div className="min-h-screen bg-background">
       <Header />
       <BackButton />
-      <UserInfo userName={userName} />
 
-      <main className="main-content">
+      <main className="container mx-auto px-4 py-8">
         {loading && (
           <LoadingSpinner message="Loading appraisal details..." />
         )}
         
         {error && (
-          <div className="message error">
-            {error}
-          </div>
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         
         {success && (
-          <div className="message success">
-            {success}
-          </div>
+          <Alert className="mb-6 border-green-200 bg-green-50 text-green-700">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
         )}
 
         {!loading && !error && appraisalData && (
-          <>
-            <Description
-              customerDescription={appraisalData.customerDescription}
-              iaDescription={appraisalData.iaDescription}
-            />
+          <div className="space-y-8">
+            <Card>
+              <CardContent className="p-6">
+                <Description
+                  customerDescription={appraisalData.customerDescription}
+                  iaDescription={appraisalData.iaDescription}
+                />
+              </CardContent>
+            </Card>
 
-            <ImageViewer images={appraisalData.images} />
+            <Card>
+              <CardContent className="p-6">
+                <ImageViewer images={appraisalData.images} />
+              </CardContent>
+            </Card>
 
-            <AppraisalForm 
-              appraisalId={appraisalId}
-              onSuccess={handleSuccess}
-            />
-          </>
+            <Card>
+              <CardContent className="p-6">
+                <AppraisalForm 
+                  appraisalId={appraisalId}
+                  onSuccess={handleSuccess}
+                />
+              </CardContent>
+            </Card>
+          </div>
         )}
       </main>
 

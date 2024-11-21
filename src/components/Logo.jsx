@@ -2,19 +2,14 @@ import React from 'react';
 import './Logo.css';
 
 const Logo = ({ size = 'small' }) => {
-  // Define sizes in pixels for different contexts
   const sizes = {
-    small: 32,    // Header/Dashboard
-    medium: 48,   // Login page
-    large: 64    // Other contexts
+    small: 32,
+    medium: 48,
+    large: 64
   };
 
   const pixelSize = sizes[size] || sizes.small;
-  
-  // Use ImageKit transformations
-  // tr=w-{width},h-{height} for exact dimensions
-  // q-90 for quality
-  const imageUrl = `https://ik.imagekit.io/appraisily/WebPage/logo.JPG?tr=w-${pixelSize},h-${pixelSize},q-90`;
+  const imageUrl = `https://ik.imagekit.io/appraisily/WebPage/logo_new.png?tr=w-${pixelSize},h-${pixelSize},q-90`;
 
   return (
     <div className={`logo logo-${size}`}>

@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { AlertCircle } from "lucide-react";
 import GoogleSignIn from './GoogleSignIn';
 import { login } from '../services/auth';
-import './LoginForm.css';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -26,50 +30,70 @@ const LoginForm = () => {
   };
 
   return (
-    <>
-      <form className="login-form" onSubmit={handleSubmit}>
+    <div className="grid gap-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="error-message" role="alert">
-            {error}
+          <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-200">
+            <AlertCircle className="h-4 w-4" />
+            <p>{error}</p>
           </div>
         )}
 
-        <div className="input-group">
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="email">
+            Email address
+          </Label>
+          <Input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            placeholder="name@example.com"
             required
+            autoComplete="email"
+            disabled={isLoading}
+            className="h-11"
           />
         </div>
 
-        <div className="input-group">
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="password">
+            Password
+          </Label>
+          <Input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
             required
             autoComplete="current-password"
+            disabled={isLoading}
+            className="h-11"
           />
         </div>
 
-        <button 
+        <Button 
           type="submit" 
-          className="submit-button"
           disabled={isLoading}
+          className="w-full h-11 text-base font-semibold"
         >
-          {isLoading ? 'Signing in...' : 'Sign in with Email'}
-        </button>
-
-        <div className="login-divider">
-          <span>or</span>
-        </div>
-
-        <GoogleSignIn />
+          {isLoading ? "Signing in..." : "Sign in with Email"}
+        </Button>
       </form>
-    </>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <Separator className="w-full" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <GoogleSignIn />
+    </div>
   );
 };
 

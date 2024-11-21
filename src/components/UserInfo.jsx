@@ -1,6 +1,7 @@
 import React from 'react';
 import { logout } from '../services/auth';
-import './UserInfo.css';
+import { Button } from "@/components/ui/button";
+import { User, LogOut } from "lucide-react";
 
 const UserInfo = ({ userName }) => {
   const handleLogout = async () => {
@@ -13,17 +14,29 @@ const UserInfo = ({ userName }) => {
     }
   };
 
+  if (!userName) return null;
+
   return (
-    <>
-      <button id="logout-button" className="logout-button" onClick={handleLogout}>
-        Logout
-      </button>
-      {userName && (
-        <div id="user-name" className="user-name">
-          Logged in as {userName}
-        </div>
-      )}
-    </>
+    <div className="fixed top-4 right-4 flex items-center gap-2">
+      <Button 
+        variant="outline" 
+        size="sm"
+        className="bg-white/50 backdrop-blur-sm shadow-sm"
+      >
+        <User className="h-4 w-4 mr-2" />
+        {userName}
+      </Button>
+
+      <Button 
+        variant="destructive" 
+        size="sm"
+        className="shadow-sm"
+        onClick={handleLogout}
+      >
+        <LogOut className="h-4 w-4 mr-2" />
+        Sign out
+      </Button>
+    </div>
   );
 };
 

@@ -1,11 +1,3 @@
-.google-signin-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-}
-
 .g_id_signin {
   width: 100% !important;
   display: flex !important;
@@ -21,7 +13,7 @@
 
 .g_id_signin iframe {
   width: 100% !important;
-  max-width: 280px !important;
+  max-width: none !important;
   margin: 0 auto !important;
   display: block !important;
 }

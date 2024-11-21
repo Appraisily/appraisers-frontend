@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { ENDPOINTS } from '../config/endpoints';
-import './GoogleSignIn.css';
 
 const GoogleSignIn = () => {
   useEffect(() => {
@@ -25,7 +24,7 @@ const GoogleSignIn = () => {
           shape: 'rectangular',
           text: 'continue_with',
           logo_alignment: 'center',
-          width: '300'
+          width: '100%'
         }
       );
     };
@@ -61,9 +60,10 @@ const GoogleSignIn = () => {
   };
 
   return (
-    <div className="google-signin-container">
-      <div id="g_id_signin"></div>
-    </div>
+    <div 
+      id="g_id_signin" 
+      className="w-full flex justify-center items-center min-h-[44px] bg-white rounded-md border border-input shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+    />
   );
 };
 
