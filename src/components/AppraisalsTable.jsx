@@ -10,11 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, CheckCircle, ArrowUpDown } from "lucide-react";
+import { parseDate, getRelativeTime } from '../utils/dateUtils';
 
 const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) => {
   const [sortConfig, setSortConfig] = useState({
     key: 'date',
-    direction: 'desc'
+    direction: 'asc'
   });
 
   if (!appraisals || appraisals.length === 0) {
@@ -28,7 +29,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
   }
 
   const getShortId = (identifier) => {
-    if (!identifier) return '';
+    if (!identifier || typeof identifier !== 'string') return '';
     const parts = identifier.split('_');
     return parts[parts.length - 1].slice(-8);
   };
@@ -46,24 +47,6 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
     }
   };
 
-  const getRelativeTime = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
-    const diffInMonths = Math.floor(diffInDays / 30);
-    const diffInYears = Math.floor(diffInDays / 365);
-
-    if (diffInSeconds < 60) return 'just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 30) return `${diffInDays}d ago`;
-    if (diffInMonths < 12) return `${diffInMonths}mo ago`;
-    return `${diffInYears}y ago`;
-  };
-
   const handleSort = (key) => {
     setSortConfig({
       key,
@@ -73,8 +56,8 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
 
   const sortedAppraisals = [...appraisals].sort((a, b) => {
     if (sortConfig.key === 'date') {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
+      const dateA = parseDate(a.date);
+      const dateB = parseDate(b.date);
       return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
     }
     if (sortConfig.key === 'type') {
@@ -110,14 +93,20 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
             </TableHead>
             <TableHead className="w-[100px]">Session ID</TableHead>
             <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead className="w-[120px] text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedAppraisals.map((appraisal) => (
             <TableRow 
               key={appraisal.id}
-              className="group"
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => onActionClick(
+                appraisal.id,
+                appraisal.wordpressUrl,
+                appraisal.identifier,
+                appraisal.customerEmail,
+                appraisal.customerName
+              )}
             >
               <TableCell 
                 className="font-medium"
@@ -132,7 +121,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                 className="font-mono text-sm" 
                 title={appraisal.identifier}
               >
-                {getShortId(appraisal.identifier)}
+                {appraisal.sessionId || appraisal.identifier || ''}
               </TableCell>
               <TableCell>
                 <Badge 
@@ -141,26 +130,6 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                 >
                   {appraisal.status}
                 </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant={currentAppraisalType === 'pending' ? 'default' : 'secondary'}
-                  size="sm"
-                  onClick={() => onActionClick(appraisal.id, appraisal.wordpressUrl)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity gap-2"
-                >
-                  {currentAppraisalType === 'pending' ? (
-                    <>
-                      <CheckCircle className="h-4 w-4" />
-                      Complete
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="h-4 w-4" />
-                      Edit
-                    </>
-                  )}
-                </Button>
               </TableCell>
             </TableRow>
           ))}
