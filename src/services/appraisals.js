@@ -24,9 +24,11 @@ export const getCompleted = async () => {
 export const getDetails = async (id) => {
   try {
     const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS(id));
+    console.log('API Response for getDetails:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error details:', error);
+    console.error('Response data:', error.response?.data);
     throw new Error(error.message || 'Failed to fetch appraisal details');
   }
 };

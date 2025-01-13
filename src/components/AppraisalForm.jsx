@@ -17,15 +17,24 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
   React.useEffect(() => {
     const fetchAppraisalDetails = async () => {
       try {
+        console.log('Fetching details for appraisal:', appraisalId);
         const details = await getDetails(appraisalId);
+        console.log('Received appraisal details:', details);
+
         if (details.value) {
+          console.log('Setting appraisal value:', details.value);
           setAppraisalValue(details.value.toString());
         }
-        if (details.appraisersDescription) {
-          setDescription(details.appraisersDescription);
+        
+        // Check both possible field names for description
+        const descriptionValue = details.appraisersDescription || details.appraiserDescription;
+        if (descriptionValue) {
+          console.log('Setting description:', descriptionValue);
+          setDescription(descriptionValue);
         }
       } catch (err) {
         console.error('Error fetching appraisal details:', err);
+        console.error('Error details:', err.response?.data);
       } finally {
         setIsLoading(false);
       }
