@@ -69,12 +69,12 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
   });
 
   return (
-    <div className="max-w-4xl mx-auto rounded-md border bg-card">
+    <div className="w-full mx-auto rounded-md border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead 
-              className="w-[120px] cursor-pointer hover:bg-muted/50 transition-colors"
+              className="w-[15%] cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => handleSort('date')}
             >
               <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               </div>
             </TableHead>
             <TableHead 
-              className="w-[140px] cursor-pointer hover:bg-muted/50 transition-colors"
+              className="w-[20%] cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => handleSort('type')}
             >
               <div className="flex items-center gap-2">
@@ -91,9 +91,9 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                 <ArrowUpDown className="h-4 w-4" />
               </div>
             </TableHead>
-            <TableHead className="w-[100px]">Session ID</TableHead>
-            <TableHead className="w-[140px]">Customer</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
+            <TableHead className="w-[25%]">Session ID</TableHead>
+            <TableHead className="w-[25%]">Customer</TableHead>
+            <TableHead className="w-[15%]">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -110,27 +110,27 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               )}
             >
               <TableCell 
-                className="font-medium"
+                className="font-medium whitespace-nowrap"
                 title={new Date(appraisal.date).toLocaleString()}
               >
                 {getRelativeTime(appraisal.date)}
               </TableCell>
-              <TableCell className="truncate">
+              <TableCell className="truncate max-w-[200px]">
                 {appraisal.appraisalType}
               </TableCell>
               <TableCell 
-                className="font-mono text-sm" 
+                className="font-mono text-sm truncate max-w-[200px]" 
                 title={appraisal.identifier}
               >
                 {appraisal.sessionId || appraisal.identifier || ''}
               </TableCell>
-              <TableCell className="truncate" title={appraisal.customerName}>
+              <TableCell className="truncate max-w-[200px]" title={appraisal.customerName}>
                 {appraisal.customerName || 'N/A'}
               </TableCell>
               <TableCell>
                 <Badge 
                   variant="outline" 
-                  className={`${getStatusColor(appraisal.status)} capitalize`}
+                  className={`${getStatusColor(appraisal.status)} capitalize whitespace-nowrap`}
                 >
                   {appraisal.status}
                 </Badge>

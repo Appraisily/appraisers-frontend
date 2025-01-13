@@ -158,7 +158,7 @@ const ManualAppraisalForm = ({ appraisalId, customerData, onSuccess }) => {
           className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Submit Appraisal"}
+          {isSubmitting ? "Uploading Images..." : "Upload Images & Submit"}
         </Button>
       </div>
     </form>
