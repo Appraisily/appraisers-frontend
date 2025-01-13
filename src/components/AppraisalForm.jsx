@@ -1,17 +1,38 @@
 import React, { useState } from 'react';
-import { completeAppraisal } from '../services/appraisals';
+import { completeAppraisal, getDetails } from '../services/appraisals';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 const AppraisalForm = ({ appraisalId, onSuccess }) => {
   const [appraisalValue, setAppraisalValue] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchAppraisalDetails = async () => {
+      try {
+        const details = await getDetails(appraisalId);
+        if (details.value) {
+          setAppraisalValue(details.value.toString());
+        }
+        if (details.appraisersDescription) {
+          setDescription(details.appraisersDescription);
+        }
+      } catch (err) {
+        console.error('Error fetching appraisal details:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAppraisalDetails();
+  }, [appraisalId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,6 +69,14 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
