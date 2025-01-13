@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ImageViewer from '../components/ImageViewer';
+import AppraisalDetails from '../components/AppraisalDetails';
 import AppraisalForm from '../components/AppraisalForm';
 import ManualAppraisalForm from '../components/ManualAppraisalForm';
 import Description from '../components/Description';
@@ -146,6 +147,8 @@ const AppraisalPage = () => {
 
         {!loading && !error && appraisalData && (
           <div className="space-y-8">
+            <AppraisalDetails appraisalData={appraisalData} />
+
             {(appraisalData.customerDescription || appraisalData.iaDescription) && (
               <Card>
                 <CardContent className="p-6">

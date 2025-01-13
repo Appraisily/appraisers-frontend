@@ -3,13 +3,22 @@ import { completeAppraisal, getDetails } from '../services/appraisals';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 
+const APPRAISAL_TYPES = [
+  { value: 'RegularArt', label: 'Regular Art' },
+  { value: 'PremiumArt', label: 'Premium Art' },
+  { value: 'InsuranceArt', label: 'Insurance Art' },
+  { value: 'TaxArt', label: 'Tax Art' }
+];
+
 const AppraisalForm = ({ appraisalId, onSuccess }) => {
   const [appraisalValue, setAppraisalValue] = useState('');
   const [description, setDescription] = useState('');
+  const [appraisalType, setAppraisalType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +29,12 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
         console.log('Fetching details for appraisal:', appraisalId);
         const details = await getDetails(appraisalId);
         console.log('Received appraisal details:', details);
+
+        // Set appraisal type if available
+        if (details.appraisalType) {
+          console.log('Setting appraisal type:', details.appraisalType);
+          setAppraisalType(details.appraisalType);
+        }
 
         if (details.value) {
           console.log('Setting appraisal value:', details.value);
@@ -51,6 +66,11 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
       setError('Please enter a valid positive number for the appraisal value.');
       return;
     }
+    
+    if (!appraisalType) {
+      setError('Please select an appraisal type.');
+      return;
+    }
 
     if (!description.trim()) {
       setError('Please enter a description.');
@@ -63,7 +83,8 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
       const response = await completeAppraisal(
         appraisalId,
         Number(appraisalValue),
-        description.trim()
+        description.trim(),
+        appraisalType
       );
 
       if (response.success) {
@@ -117,6 +138,27 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
             placeholder="Enter appraisal value"
             disabled={isSubmitting}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="appraisalType">Appraisal Type</Label>
+          <Select 
+            value={appraisalType} 
+            onValueChange={setAppraisalType}
+            defaultValue={appraisalType}
+            required
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={appraisalType ? undefined : "Select appraisal type"} />
+            </SelectTrigger>
+            <SelectContent>
+              {APPRAISAL_TYPES.map(type => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">

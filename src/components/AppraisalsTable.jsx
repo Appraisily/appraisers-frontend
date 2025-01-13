@@ -92,6 +92,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               </div>
             </TableHead>
             <TableHead className="w-[100px]">Session ID</TableHead>
+            <TableHead className="w-[140px]">Customer</TableHead>
             <TableHead className="w-[100px]">Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -122,6 +123,9 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                 title={appraisal.identifier}
               >
                 {appraisal.sessionId || appraisal.identifier || ''}
+              </TableCell>
+              <TableCell className="truncate" title={appraisal.customerName}>
+                {appraisal.customerName || 'N/A'}
               </TableCell>
               <TableCell>
                 <Badge 

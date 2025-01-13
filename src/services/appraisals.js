@@ -24,7 +24,10 @@ export const getCompleted = async () => {
 export const getDetails = async (id) => {
   try {
     const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS(id));
-    console.log('API Response for getDetails:', response.data);
+    console.log('API Response for getDetails:', {
+      ...response.data,
+      gcsBackupUrl: response.data.gcsBackupUrl || 'Not provided'
+    });
     return response.data;
   } catch (error) {
     console.error('Error details:', error);
@@ -46,11 +49,12 @@ export const setValue = async (id, appraisalValue, description) => {
   }
 };
 
-export const completeAppraisal = async (id, appraisalValue, description) => {
+export const completeAppraisal = async (id, appraisalValue, description, appraisalType) => {
   try {
     const response = await api.post(ENDPOINTS.APPRAISALS.COMPLETE(id), {
       appraisalValue,
-      description
+      description,
+      appraisalType
     });
     return response.data;
   } catch (error) {
