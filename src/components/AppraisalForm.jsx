@@ -9,10 +9,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 
 const APPRAISAL_TYPES = [
-  { value: 'RegularArt', label: 'Regular Art' },
-  { value: 'PremiumArt', label: 'Premium Art' },
-  { value: 'InsuranceArt', label: 'Insurance Art' },
-  { value: 'TaxArt', label: 'Tax Art' }
+  { value: 'Regular', label: 'Regular' },
+  { value: 'Insurance', label: 'Insurance' },
+  { value: 'IRS', label: 'IRS' }
 ];
 
 const AppraisalForm = ({ appraisalId, onSuccess }) => {
