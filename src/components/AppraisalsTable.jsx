@@ -91,7 +91,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                 <ArrowUpDown className="h-4 w-4" />
               </div>
             </TableHead>
-            <TableHead className="w-[25%]">Session ID</TableHead>
+            <TableHead className="w-[25%]">Payment Session ID</TableHead>
             <TableHead className="w-[25%]">Customer</TableHead>
             <TableHead className="w-[15%]">Status</TableHead>
           </TableRow>
@@ -102,11 +102,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               key={appraisal.id}
               className="cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => onActionClick(
-                appraisal.id,
-                appraisal.wordpressUrl,
-                appraisal.identifier,
-                appraisal.customerEmail,
-                appraisal.customerName
+                appraisal
               )}
             >
               <TableCell 

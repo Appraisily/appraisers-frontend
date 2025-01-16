@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -11,21 +11,11 @@ import { ENDPOINTS } from '../config/endpoints';
 import './EditAppraisalPage.css';
 
 const EditAppraisalPage = () => {
-  const [searchParams] = useSearchParams();
-  const appraisalId = searchParams.get('id');
-  const wordpressUrl = searchParams.get('wpUrl');
+  const { id: appraisalId } = useParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [appraisalData, setAppraisalData] = useState(null);
   const userName = localStorage.getItem('userName');
-
-  useEffect(() => {
-    if (!appraisalId || !wordpressUrl) {
-      window.location.href = '/';
-      return;
-    }
-    loadAppraisalDetails();
-  }, [appraisalId, wordpressUrl]);
 
   const loadAppraisalDetails = async () => {
     try {
@@ -46,6 +36,14 @@ const EditAppraisalPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!appraisalId) {
+      window.location.href = '/';
+      return;
+    }
+    loadAppraisalDetails();
+  }, [appraisalId]);
 
   const handleFieldUpdate = async (fieldName, newValue) => {
     try {
@@ -75,7 +73,7 @@ const EditAppraisalPage = () => {
     }
   };
 
-  if (!appraisalId || !wordpressUrl) {
+  if (!appraisalId) {
     return null;
   }
 

@@ -118,16 +118,20 @@ const Dashboard = () => {
           <AppraisalsTable
             appraisals={appraisalsList}
             currentAppraisalType={currentAppraisalType}
-            onActionClick={(id, url = '', sessionId = '', email = '', name = '') => {
-              const path = currentAppraisalType === 'pending' ? '/appraisal' : '/edit-appraisal';
+            onActionClick={(appraisal) => {
               const params = new URLSearchParams({
-                id,
-                wpUrl: url || '',
-                sessionId: sessionId || '',
-                email: email || '',
-                name: name || ''
+                id: appraisal.id,
+                wpUrl: appraisal.wordpressUrl || '',
+                sessionId: appraisal.identifier || '',
+                email: appraisal.customerEmail || '',
+                name: appraisal.customerName || ''
               });
-              navigate(`${path}?${params.toString()}`);
+
+              if (currentAppraisalType === 'pending') {
+                navigate(`/appraisal?${params.toString()}`);
+              } else {
+                navigate(`/edit-appraisal?${params.toString()}`);
+              }
             }}
           />
           {loading && <LoadingSpinner />}
