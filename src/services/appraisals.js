@@ -23,7 +23,7 @@ export const getCompleted = async () => {
 
 export const getDetails = async (id) => {
   try {
-    const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS(id));
+    const response = await api.get(`${ENDPOINTS.APPRAISALS.LIST}/${id}`);
     console.log('API Response for getDetails:', {
       ...response.data,
       gcsBackupUrl: response.data.gcsBackupUrl || 'Not provided'

@@ -8,7 +8,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import { AlertCircle, CheckCircle2, Image as ImageIcon, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const BulkAppraisalPage = () => {
   const [searchParams] = useSearchParams();
@@ -35,7 +36,7 @@ const BulkAppraisalPage = () => {
 
   const loadAppraisalDetails = async () => {
     try {
-      const response = await api.get(`/api/appraisals/${appraisalId}/list`);
+      const response = await api.get(`/api/appraisals/${appraisalId}`);
       console.log('Appraisal details response:', response.data);
       setAppraisalDetails(response.data);
     } catch (err) {
@@ -232,14 +233,19 @@ const BulkAppraisalPage = () => {
       <main className="container mx-auto px-4 py-8">
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5" />
-              Bulk Appraisal Processing {appraisalDetails?.appraisalType?.match(/\((\d+) items\)/)?.[1] && (
-                <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
-                  {appraisalDetails.appraisalType.match(/\((\d+) items\)/)[1]} Items Total
-                </Badge>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Bulk Appraisal Processing
+              </CardTitle>
+              {appraisalDetails?.appraisalType && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {appraisalDetails.appraisalType}
+                  </Badge>
+                </div>
               )}
-            </CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
