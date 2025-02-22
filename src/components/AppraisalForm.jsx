@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Wand2 } from "lucide-react";
 
 const APPRAISAL_TYPES = [
   { value: 'Regular', label: 'Regular' },
@@ -21,6 +21,39 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isSuggestingValue, setIsSuggestingValue] = useState(false);
+
+  const suggestValue = async () => {
+    try {
+      setIsSuggestingValue(true);
+      setError('');
+
+      const response = await fetch('https://appraisers-backend-856401495068.us-central1.run.app/api/appraisals/propose-value', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          appraiserDescription: description,
+          customerDescription: appraisalData?.customerDescription || '',
+          aiDescription: appraisalData?.iaDescription || ''
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAppraisalValue(data.value.toString());
+      } else {
+        throw new Error(data.message || 'Failed to get value suggestion');
+      }
+    } catch (err) {
+      console.error('Error getting value suggestion:', err);
+      setError(err.message || 'Failed to get value suggestion');
+    } finally {
+      setIsSuggestingValue(false);
+    }
+  };
 
   React.useEffect(() => {
     const fetchAppraisalDetails = async () => {
@@ -126,17 +159,35 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="appraisalValue">Appraisal Value ($)</Label>
-          <Input
-            id="appraisalValue"
-            type="number"
-            value={appraisalValue}
-            onChange={(e) => setAppraisalValue(e.target.value)}
-            required
-            min="0"
-            step="0.01"
-            placeholder="Enter appraisal value"
-            disabled={isSubmitting}
-          />
+          <div className="flex gap-2">
+            <Input
+              id="appraisalValue"
+              type="number"
+              value={appraisalValue}
+              onChange={(e) => setAppraisalValue(e.target.value)}
+              required
+              min="0"
+              step="0.01"
+              placeholder="Enter appraisal value"
+              disabled={isSubmitting || isSuggestingValue}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={suggestValue}
+              disabled={isSubmitting || isSuggestingValue || !description}
+              className="shrink-0"
+            >
+              {isSuggestingValue ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Suggest Value
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2">

@@ -27,10 +27,19 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log('API Interceptor: Handling error response:', {
-      status: error.response?.status,
+    console.log('API Interceptor: Request details:', {
       url: error.config?.url,
-      method: error.config?.method
+      method: error.config?.method,
+      baseURL: error.config?.baseURL,
+      headers: error.config?.headers,
+      data: error.config?.data
+    });
+
+    console.log('API Interceptor: Error response:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers
     });
 
     const originalRequest = error.config;

@@ -25,10 +25,15 @@ export const login = async (email, password) => {
 
 export const logout = async () => {
   try {
-    await api.post(ENDPOINTS.AUTH.LOGOUT);
+    const response = await api.post(ENDPOINTS.AUTH.LOGOUT);
+    if (!response.data?.success) {
+      throw new Error('Logout failed');
+    }
+    localStorage.removeItem('userName');
+    window.location.href = '/';
   } catch (error) {
     console.error('Logout error:', error);
-  } finally {
+    // Still clear local storage and redirect on error
     localStorage.removeItem('userName');
     window.location.href = '/';
   }

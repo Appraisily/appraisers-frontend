@@ -7,7 +7,7 @@
   VITE_GOOGLE_CLIENT_ID = "856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
 
 [context.development.environment]
-  VITE_BACKEND_URL = "https://appraisers-backend-dev-856401495068.us-central1.run.app"
+  VITE_BACKEND_URL = "https://appraisers-backend-856401495068.us-central1.run.app"
   VITE_GOOGLE_CLIENT_ID = "856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
 
 [[redirects]]

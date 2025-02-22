@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import { Edit, CheckCircle, ArrowUpDown } from "lucide-react";
 import { parseDate, getRelativeTime } from '../utils/dateUtils';
 
 const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) => {
+  const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState({
     key: 'date',
     direction: 'asc'
@@ -101,9 +103,16 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
             <TableRow 
               key={appraisal.id}
               className="cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => onActionClick(
-                appraisal
-              )}
+              onClick={() => {
+                if (appraisal.appraisalType === 'Bulk') {
+                  const params = new URLSearchParams({
+                    id: appraisal.id
+                  });
+                  navigate(`/bulk-appraisal?${params.toString()}`);
+                } else {
+                  onActionClick(appraisal);
+                }
+              }}
             >
               <TableCell 
                 className="font-medium whitespace-nowrap"
