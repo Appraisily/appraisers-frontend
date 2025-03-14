@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { completeAppraisal, getDetails } from '../services/appraisals';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSuggestingValue, setIsSuggestingValue] = useState(false);
+  const [appraisalData, setAppraisalData] = useState(null);
 
   const suggestValue = async () => {
     try {
@@ -55,12 +56,15 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchAppraisalDetails = async () => {
       try {
         console.log('Fetching details for appraisal:', appraisalId);
         const details = await getDetails(appraisalId);
         console.log('Received appraisal details:', details);
+
+        // Store the full appraisal data
+        setAppraisalData(details);
 
         // Set appraisal type if available
         if (details.appraisalType) {

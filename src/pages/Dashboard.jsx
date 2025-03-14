@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Controls from '../components/Controls';
 import AppraisalsTable from '../components/AppraisalsTable';
+import PaginationControls from '../components/PaginationControls';
 import LoginForm from '../components/LoginForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
@@ -18,6 +19,8 @@ const Dashboard = () => {
   const [currentAppraisalType, setCurrentAppraisalType] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
 
@@ -27,6 +30,11 @@ const Dashboard = () => {
     } else {
       setLoading(false);
     }
+  }, [currentAppraisalType]);
+
+  useEffect(() => {
+    // Reset to first page when changing appraisal type
+    setCurrentPage(1);
   }, [currentAppraisalType]);
 
   const loadAppraisals = async (type) => {
@@ -39,8 +47,23 @@ const Dashboard = () => {
         appraisalService.getPending()
       );
 
-      setAppraisalsList(data);
-      setAllAppraisals(data);
+      // Sort the appraisals based on type:
+      // - Completed appraisals: Most recent first (newest to oldest)
+      // - Pending appraisals: Oldest first (oldest to newest)
+      const sortedData = [...data].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        
+        if (type === 'completed') {
+          return dateB - dateA; // Most recent first for completed
+        } else {
+          return dateA - dateB; // Oldest first for pending
+        }
+      });
+
+      setAppraisalsList(sortedData);
+      setAllAppraisals(sortedData);
+      setCurrentPage(1); // Reset to first page when loading new data
     } catch (err) {
       console.error('Error loading appraisals:', err);
       setError(err.message || 'Failed to load appraisals');
@@ -52,6 +75,7 @@ const Dashboard = () => {
   const handleSearch = (query) => {
     if (!query.trim()) {
       setAppraisalsList(allAppraisals);
+      setCurrentPage(1); // Reset to first page when clearing search
       return;
     }
 
@@ -63,7 +87,17 @@ const Dashboard = () => {
     );
 
     setAppraisalsList(filteredAppraisals);
+    setCurrentPage(1); // Reset to first page on new search
   };
+
+  // Get current page items
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = appraisalsList.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(appraisalsList.length / itemsPerPage);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (!userName) {
     return (
@@ -116,7 +150,7 @@ const Dashboard = () => {
 
         <div className="relative">
           <AppraisalsTable
-            appraisals={appraisalsList}
+            appraisals={currentItems}
             currentAppraisalType={currentAppraisalType}
             onActionClick={(appraisal) => {
               const params = new URLSearchParams({
@@ -134,7 +168,22 @@ const Dashboard = () => {
               }
             }}
           />
+          
           {loading && <LoadingSpinner />}
+          
+          {!loading && appraisalsList.length > 0 && (
+            <div className="mt-4">
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={paginate}
+                className="py-2"
+              />
+              <div className="text-xs text-muted-foreground text-center mt-2">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, appraisalsList.length)} of {appraisalsList.length} appraisals
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
