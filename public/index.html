@@ -3,12 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <link rel="icon" type="image/png" href="https://ik.imagekit.io/appraisily/WebPage/logo_new.png?tr=w-32,h-32" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Appraisers Dashboard</title>
+  
   <!-- Load Google Identity Services library -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <!-- Load Inter variable font -->
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  
   <!-- Link to the external CSS file -->
   <link rel="stylesheet" href="/css/styles.css">
-  <!-- Rest of the head content -->
+  
+  <!-- Font feature settings for NY aesthetic -->
+  <style>
+    :root {
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+  </style>
 </head>
-<!-- Rest of the file content remains unchanged -->
+<body>
+  <div id="root"></div>
+</body>
 </html>

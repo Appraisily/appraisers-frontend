@@ -10,19 +10,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, CheckCircle, ArrowUpDown } from "lucide-react";
+import { Edit, CheckCircle, ArrowUpDown, Calendar, User, FileText } from "lucide-react";
 import { parseDate, getRelativeTime } from '../utils/dateUtils';
 
 const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) => {
   const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState({
     key: 'date',
-    direction: 'asc'
+    direction: 'desc' // Changed to desc as default to show newest first
   });
 
   if (!appraisals || appraisals.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed p-12 text-center">
+      <div className="rounded-lg border border-border/50 p-12 text-center bg-muted/30 shadow-elevation-1">
         <p className="text-muted-foreground">
           No {currentAppraisalType} appraisals found.
         </p>
@@ -36,16 +36,16 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
     return parts[parts.length - 1].slice(-8);
   };
 
-  const getStatusColor = (status) => {
+  const getStatusBadge = (status) => {
     switch (status.toLowerCase()) {
       case 'pending':
-        return 'text-yellow-700 bg-yellow-50 border-yellow-200 hover:bg-yellow-100/80';
+        return <Badge variant="warning">{status}</Badge>;
       case 'completed':
-        return 'text-green-700 bg-green-50 border-green-200 hover:bg-green-100/80';
+        return <Badge variant="success">{status}</Badge>;
       case 'in-progress':
-        return 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100/80';
+        return <Badge variant="info">{status}</Badge>;
       default:
-        return 'text-gray-700 bg-gray-50 border-gray-200 hover:bg-gray-100/80';
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -71,31 +71,38 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
   });
 
   return (
-    <div className="w-full mx-auto rounded-md border bg-card">
+    <div className="w-full mx-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead 
-              className="w-[15%] cursor-pointer hover:bg-muted/50 transition-colors"
+              className="cursor-pointer hover:bg-muted/70 transition-colors"
               onClick={() => handleSort('date')}
             >
               <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
                 Time
-                <ArrowUpDown className="h-4 w-4" />
+                <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />
               </div>
             </TableHead>
             <TableHead 
-              className="w-[20%] cursor-pointer hover:bg-muted/50 transition-colors"
+              className="cursor-pointer hover:bg-muted/70 transition-colors"
               onClick={() => handleSort('type')}
             >
               <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
                 Type
-                <ArrowUpDown className="h-4 w-4" />
+                <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />
               </div>
             </TableHead>
-            <TableHead className="w-[25%]">Payment Session ID</TableHead>
-            <TableHead className="w-[25%]">Customer</TableHead>
-            <TableHead className="w-[15%]">Status</TableHead>
+            <TableHead>Payment Session ID</TableHead>
+            <TableHead>
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                Customer
+              </div>
+            </TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -120,25 +127,23 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               >
                 {getRelativeTime(appraisal.date)}
               </TableCell>
-              <TableCell className="truncate max-w-[200px]">
+              <TableCell className="truncate max-w-[200px] font-medium">
                 {appraisal.appraisalType}
               </TableCell>
               <TableCell 
-                className="font-mono text-sm truncate max-w-[200px]" 
+                className="font-mono text-xs text-muted-foreground/90 truncate max-w-[200px]" 
                 title={appraisal.identifier}
               >
-                {appraisal.sessionId || appraisal.identifier || ''}
+                {appraisal.sessionId || getShortId(appraisal.identifier) || ''}
               </TableCell>
-              <TableCell className="truncate max-w-[200px]" title={appraisal.customerName}>
+              <TableCell 
+                className="truncate max-w-[200px]" 
+                title={appraisal.customerName}
+              >
                 {appraisal.customerName || 'N/A'}
               </TableCell>
               <TableCell>
-                <Badge 
-                  variant="outline" 
-                  className={`${getStatusColor(appraisal.status)} capitalize whitespace-nowrap`}
-                >
-                  {appraisal.status}
-                </Badge>
+                {getStatusBadge(appraisal.status)}
               </TableCell>
             </TableRow>
           ))}
