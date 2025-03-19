@@ -23,7 +23,8 @@ export const getCompleted = async () => {
 
 export const getDetails = async (id) => {
   try {
-    const response = await api.get(`${ENDPOINTS.APPRAISALS.LIST}/${id}`);
+    // Use the correct endpoint for details
+    const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS(id));
     console.log('API Response for getDetails:', {
       ...response.data,
       gcsBackupUrl: response.data.gcsBackupUrl || 'Not provided'
@@ -33,6 +34,19 @@ export const getDetails = async (id) => {
     console.error('Error details:', error);
     console.error('Response data:', error.response?.data);
     throw new Error(error.message || 'Failed to fetch appraisal details');
+  }
+};
+
+export const getDetailsForEdit = async (id) => {
+  try {
+    // Use the edit endpoint that provides additional form values
+    const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS_EDIT(id));
+    console.log('API Response for getDetailsForEdit:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching edit details:', error);
+    console.error('Response data:', error.response?.data);
+    throw new Error(error.message || 'Failed to fetch appraisal edit details');
   }
 };
 

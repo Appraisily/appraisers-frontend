@@ -9,6 +9,7 @@ export const API_ROUTES = {
     LIST: '/api/appraisals',
     COMPLETED: '/api/appraisals/completed',
     DETAILS: '/api/appraisals/:id/list',
+    DETAILS_EDIT: '/api/appraisals/:id/list-edit',
     COMPLETE_PROCESS: '/api/appraisals/:id/complete-process',
     SET_VALUE: '/api/appraisals/:id/set-value'
   }

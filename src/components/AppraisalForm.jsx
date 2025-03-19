@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { completeAppraisal, getDetails } from '../services/appraisals';
+import { completeAppraisal, getDetailsForEdit } from '../services/appraisals';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,9 +59,9 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
   useEffect(() => {
     const fetchAppraisalDetails = async () => {
       try {
-        console.log('Fetching details for appraisal:', appraisalId);
-        const details = await getDetails(appraisalId);
-        console.log('Received appraisal details:', details);
+        console.log('Fetching edit details for appraisal:', appraisalId);
+        const details = await getDetailsForEdit(appraisalId);
+        console.log('Received edit details:', details);
 
         // Store the full appraisal data
         setAppraisalData(details);
@@ -77,8 +77,10 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
           setAppraisalValue(details.value.toString());
         }
         
-        // Check both possible field names for description
-        const descriptionValue = details.appraisersDescription || details.appraiserDescription;
+        // Check all possible field names for description
+        const descriptionValue = details.appraisersDescription || 
+                                details.appraiserDescription || 
+                                details.description;
         if (descriptionValue) {
           console.log('Setting description:', descriptionValue);
           setDescription(descriptionValue);

@@ -32,6 +32,27 @@ const AppraisalPage = () => {
   const [showManualForm, setShowManualForm] = useState(!wpUrl);
   const [success, setSuccess] = useState('');
 
+  // Helper to extract post ID from WordPress URL
+  const extractPostId = (url) => {
+    if (!url) return null;
+    try {
+      const wpUrl = new URL(url);
+      return wpUrl.searchParams.get('post');
+    } catch (e) {
+      console.error('Error parsing WordPress URL:', e);
+      return null;
+    }
+  };
+  
+  // Helper to generate a cleaner URL with fewer query parameters
+  const generateCleanUrl = (id, postId, sessionId) => {
+    const url = new URL(window.location.origin + window.location.pathname);
+    url.searchParams.set('id', id);
+    if (postId) url.searchParams.set('postId', postId);
+    if (sessionId) url.searchParams.set('sessionId', sessionId);
+    return url.toString();
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -45,7 +66,16 @@ const AppraisalPage = () => {
         return;
       }
       
-      console.log('Loading appraisal details:', { wpUrl, showManualForm: !wpUrl });
+      console.log('Loading appraisal details:', { appraisalId, wpUrl, sessionId });
+      
+      // Clean up the URL if needed (for better bookmarking and sharing)
+      if (wpUrl && sessionId) {
+        const postId = extractPostId(wpUrl);
+        const cleanUrl = generateCleanUrl(appraisalId, postId, sessionId);
+        if (cleanUrl !== window.location.href) {
+          window.history.replaceState({}, '', cleanUrl);
+        }
+      }
 
       // If no WordPress URL, show manual form immediately
       if (!wpUrl) {
