@@ -28,7 +28,13 @@ const Dashboard = () => {
   const userName = localStorage.getItem('userName');
   
   // WebSocket status updates
-  const { isConnected, statusUpdates, clearStatusUpdate } = useWebSocketUpdates();
+  const { 
+    isConnected, 
+    statusUpdates, 
+    connectionError,
+    clearStatusUpdate,
+    reconnect
+  } = useWebSocketUpdates();
 
   useEffect(() => {
     if (checkAuth()) {
@@ -204,6 +210,8 @@ const Dashboard = () => {
           isRefreshing={loading}
           onRefresh={() => loadAppraisals(currentAppraisalType)}
           isWebSocketConnected={isConnected}
+          webSocketError={connectionError}
+          onReconnectWebSocket={reconnect}
         />
 
         <div className="relative">

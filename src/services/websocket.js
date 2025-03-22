@@ -1,79 +1,174 @@
 import { useEffect, useRef, useState } from 'react';
 
-// WebSocket service for real-time appraisal status updates
+/**
+ * Custom hook for WebSocket connection and real-time appraisal status updates
+ * Handles secure connections (WSS) for HTTPS and standard connections (WS) for HTTP
+ */
 export const useWebSocketUpdates = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [statusUpdates, setStatusUpdates] = useState([]);
+  const [connectionError, setConnectionError] = useState(null);
   const socketRef = useRef(null);
-
+  const reconnectTimeoutRef = useRef(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 5;
+  
   const connect = () => {
-    // Get WebSocket URL from environment variables or use a default
-    const wsUrl = import.meta.env.VITE_WS_URL || 
-      `ws://${window.location.hostname}:${import.meta.env.VITE_BACKEND_PORT || '3000'}/ws`;
+    // Clear any existing connection error
+    setConnectionError(null);
     
+    // Determine the correct WebSocket protocol based on the current page protocol
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    
+    // Get WebSocket URL from environment variables or construct it securely
+    const wsUrl = import.meta.env.VITE_WS_URL || 
+      `${wsProtocol}//${window.location.hostname}${import.meta.env.VITE_BACKEND_PORT ? ':' + import.meta.env.VITE_BACKEND_PORT : ''}/ws`;
+    
+    // Don't attempt to reconnect if we already have an open connection
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       console.log('WebSocket already connected');
       return;
     }
+    
+    // Clear any existing reconnect timeout
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
 
-    console.log(`Connecting to WebSocket at ${wsUrl}`);
-    const socket = new WebSocket(wsUrl);
-    socketRef.current = socket;
-
-    socket.onopen = () => {
-      console.log('WebSocket connection established');
-      setIsConnected(true);
-    };
-
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('WebSocket received message:', data);
-        
-        if (data.type === 'appraisal_update') {
-          setStatusUpdates(prev => [...prev, data.payload]);
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket connection closed');
-      setIsConnected(false);
+    console.log(`Connecting to WebSocket at ${wsUrl} (Attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
+    
+    try {
+      const socket = new WebSocket(wsUrl);
+      socketRef.current = socket;
       
-      // Try to reconnect after a delay
-      setTimeout(() => {
+      // Set connection timeout to abort if taking too long
+      const connectionTimeout = setTimeout(() => {
+        if (socket && socket.readyState !== WebSocket.OPEN) {
+          console.warn('WebSocket connection timeout');
+          socket.close();
+          
+          setConnectionError('Connection timeout. Please check your network connection.');
+          handleReconnect();
+        }
+      }, 10000);
+      
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+        setIsConnected(true);
+        reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
+        clearTimeout(connectionTimeout);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'connection_established') {
+            console.log('WebSocket handshake complete:', data.payload);
+          } else if (data.type === 'appraisal_update') {
+            console.log('WebSocket received update:', data.payload);
+            setStatusUpdates(prev => [...prev, data.payload]);
+          } else {
+            console.log('WebSocket received message:', data);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+
+      socket.onclose = (event) => {
+        console.log(`WebSocket connection closed: ${event.code} - ${event.reason || 'No reason provided'}`);
+        setIsConnected(false);
+        clearTimeout(connectionTimeout);
+        
+        // Don't attempt to reconnect if closed normally
+        if (event.code !== 1000) {
+          handleReconnect();
+        }
+      };
+
+      socket.onerror = (error) => {
+        clearTimeout(connectionTimeout);
+        
+        // Check if error is due to mixed content (HTTPS page trying to connect to WS)
+        const isMixedContentError = window.location.protocol === 'https:' && wsUrl.startsWith('ws:');
+        if (isMixedContentError) {
+          setConnectionError('Mixed content error: Cannot connect to insecure WebSocket (WS) from a secure page (HTTPS). Server must support WSS.');
+          console.error('Mixed content error - secure page cannot connect to insecure WebSocket:', error);
+        } else {
+          setConnectionError('Connection error. Please check your network connection.');
+          console.error('WebSocket error:', error);
+        }
+        
+        setIsConnected(false);
+        
+        // Only attempt to close if the socket is still open
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.close();
+        }
+        
+        handleReconnect();
+      };
+      
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+      setConnectionError('Failed to create WebSocket connection');
+      handleReconnect();
+    }
+  };
+  
+  // Handle reconnection with exponential backoff
+  const handleReconnect = () => {
+    reconnectAttemptsRef.current += 1;
+    
+    if (reconnectAttemptsRef.current <= maxReconnectAttempts) {
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 16000);
+      
+      console.log(`Scheduling reconnect attempt in ${delay}ms`);
+      
+      reconnectTimeoutRef.current = setTimeout(() => {
+        // Only attempt to reconnect if the page is visible
         if (document.visibilityState !== 'hidden') {
           connect();
         }
-      }, 3000);
-    };
+      }, delay);
+    } else {
+      console.error(`Maximum reconnection attempts (${maxReconnectAttempts}) reached`);
+      setConnectionError(`Failed to connect after ${maxReconnectAttempts} attempts. Please refresh the page.`);
+    }
+  };
 
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      socket.close();
-    };
-
-    // Handle page visibility changes to reconnect when returning to tab
+  // Handle page visibility changes to reconnect when returning to tab
+  useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && 
-          socketRef.current?.readyState !== WebSocket.OPEN) {
-        connect();
+      if (document.visibilityState === 'visible') {
+        // If we're visible again and not connected, try to reconnect
+        if (socketRef.current?.readyState !== WebSocket.OPEN) {
+          reconnectAttemptsRef.current = 0; // Reset attempts when user returns to page
+          connect();
+        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  };
+  }, []);
 
+  // Initialize connection on component mount
   useEffect(() => {
     connect();
     
     return () => {
+      // Clean up on unmount
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
       if (socketRef.current) {
         socketRef.current.close();
       }
@@ -89,11 +184,24 @@ export const useWebSocketUpdates = () => {
   const clearAllStatusUpdates = () => {
     setStatusUpdates([]);
   };
+  
+  // Manual reconnect function for user-initiated reconnection
+  const reconnect = () => {
+    reconnectAttemptsRef.current = 0;
+    
+    if (socketRef.current) {
+      socketRef.current.close();
+    }
+    
+    connect();
+  };
 
   return {
     isConnected,
     statusUpdates,
+    connectionError,
     clearStatusUpdate,
-    clearAllStatusUpdates
+    clearAllStatusUpdates,
+    reconnect
   };
 };
