@@ -1,9 +1,17 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { RefreshCw, Wifi, WifiOff } from "lucide-react";
 
-const Controls = ({ onPendingClick, onCompletedClick, onSearch, onRefresh, isRefreshing }) => {
+const Controls = ({ 
+  onPendingClick, 
+  onCompletedClick, 
+  onSearch, 
+  onRefresh, 
+  isRefreshing, 
+  isWebSocketConnected = false 
+}) => {
   return (
     <div className="flex items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-2">
@@ -32,6 +40,21 @@ const Controls = ({ onPendingClick, onCompletedClick, onSearch, onRefresh, isRef
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
         </Button>
+        
+        {/* Real-time updates indicator */}
+        <div className="flex items-center ml-2" title={isWebSocketConnected ? "Real-time updates active" : "Real-time updates unavailable"}>
+          {isWebSocketConnected ? (
+            <Badge variant="outline" className="gap-1 px-2 border-green-500 text-green-600">
+              <Wifi className="h-3 w-3" />
+              <span className="text-xs">Live</span>
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1 px-2 border-gray-400 text-gray-500">
+              <WifiOff className="h-3 w-3" />
+              <span className="text-xs">Offline</span>
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="relative">
         <Input
