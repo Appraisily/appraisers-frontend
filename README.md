@@ -1,6 +1,6 @@
 # Appraisers Dashboard
 
-A professional web application for managing and completing art and antique appraisals. Built with React and integrated with a secure backend API.
+A professional web application for managing and completing art and antique appraisals. Built with React, Vite, and Tailwind CSS, integrated with a secure backend API.
 
 ## Overview
 
@@ -9,6 +9,7 @@ The Appraisers Dashboard provides a streamlined interface for professional appra
 - Complete new appraisals with detailed information
 - Edit existing appraisal details
 - Manage appraisal metadata and images
+- Receive real-time updates on appraisal status changes
 
 ## Key Features
 
@@ -21,16 +22,19 @@ The Appraisers Dashboard provides a streamlined interface for professional appra
   - Filter between pending and completed appraisals
   - Real-time search functionality
   - Sortable data tables
+  - Pagination controls for large datasets
 
 - **Appraisal Processing**
   - Interactive image viewer with zoom/pan/rotate
   - Detailed form validation
   - Automatic status updates
+  - Real-time notifications via WebSockets
 
 - **Data Management**
   - ACF fields editing
   - Image URL management
   - Metadata handling
+  - Bulk appraisal operations
 
 ## API Endpoints
 
@@ -108,6 +112,11 @@ Response:
 }
 ```
 
+#### Get Appraisal Details for Editing
+```http
+GET /api/appraisals/:id/details-edit
+```
+
 #### Complete Appraisal
 ```http
 POST /api/appraisals/:id/complete-process
@@ -160,6 +169,7 @@ npm install
 ```env
 VITE_BACKEND_URL=https://appraisers-backend-856401495068.us-central1.run.app
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_WS_URL=wss://your-websocket-endpoint
 ```
 
 4. Start development server:
@@ -175,10 +185,11 @@ npm run build
 ## Development
 
 - Built with Vite + React
+- Styled with Tailwind CSS and component-specific CSS
 - Uses React Router for navigation
 - Implements React Zoom Pan Pinch for image manipulation
-- Styled with modular CSS
 - Axios for API communication
+- WebSocket for real-time updates
 
 ## Production Deployment
 
@@ -187,6 +198,8 @@ The application is configured for deployment on Netlify with the following featu
 - Asset optimization
 - Route handling
 - Environment variable management
+
+Docker configuration is also available for containerized deployment.
 
 ## Browser Support
 
