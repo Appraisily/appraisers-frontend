@@ -179,12 +179,12 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                 {getShortId(appraisal.identifier || appraisal.id)}
               </TableCell>
               <TableCell>
-                <div className="font-medium">{appraisal.name || 'Unnamed'}</div>
-                <div className="text-xs text-muted-foreground">{appraisal.type || 'Standard'}</div>
+                <div className="font-medium">{appraisal.name || appraisal.appraisalType || 'Unnamed'}</div>
+                <div className="text-xs text-muted-foreground">{appraisal.type || appraisal.appraisalType || 'Standard'}</div>
               </TableCell>
               <TableCell>
                 <div className="text-sm truncate max-w-[280px]">
-                  {appraisal.description || 'No description available'}
+                  {appraisal.description || appraisal.iaDescription || 'No description available'}
                 </div>
               </TableCell>
               <TableCell>
@@ -203,7 +203,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-muted-foreground" />
-                  <span>{appraisal.customer_name || 'Unknown'}</span>
+                  <span>{appraisal.customer_name || appraisal.customerName || 'Unknown'}</span>
                 </div>
               </TableCell>
               <TableCell className="text-right">

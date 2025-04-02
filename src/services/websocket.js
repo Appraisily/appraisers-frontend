@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Custom hook for WebSocket connection and real-time appraisal status updates
  * Handles secure connections (WSS) for HTTPS and standard connections (WS) for HTTP
+ * Includes heartbeat ping to prevent connection timeouts
  */
 export const useWebSocketUpdates = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -11,6 +12,7 @@ export const useWebSocketUpdates = () => {
   const socketRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
+  const heartbeatIntervalRef = useRef(null);
   const maxReconnectAttempts = 5;
   
   const connect = () => {
@@ -85,6 +87,18 @@ export const useWebSocketUpdates = () => {
         setIsConnected(true);
         reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful connection
         clearTimeout(connectionTimeout);
+        
+        // Set up heartbeat to keep connection alive
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
+        }
+        
+        heartbeatIntervalRef.current = setInterval(() => {
+          if (socket.readyState === WebSocket.OPEN) {
+            // Send ping to server
+            socket.send(JSON.stringify({ type: 'ping', timestamp: new Date().toISOString() }));
+          }
+        }, 25000); // Ping every 25 seconds (less than server's 30-second interval)
       };
 
       socket.onmessage = (event) => {

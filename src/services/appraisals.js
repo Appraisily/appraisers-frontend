@@ -4,7 +4,15 @@ import { ENDPOINTS } from '../config/endpoints';
 export const getPending = async () => {
   try {
     const response = await api.get(ENDPOINTS.APPRAISALS.LIST);
-    return Array.isArray(response.data) ? response.data : [];
+    // Map backend field names to frontend expected names
+    const appraisals = Array.isArray(response.data) ? response.data.map(item => ({
+      ...item,
+      name: item.name || item.appraisalType || 'Standard',
+      type: item.type || item.appraisalType || 'Standard',
+      description: item.description || item.iaDescription || 'No description available',
+      customer_name: item.customer_name || item.customerName || 'Unknown'
+    })) : [];
+    return appraisals;
   } catch (error) {
     console.error('Error details:', error);
     throw new Error(error.message || 'Failed to fetch pending appraisals');
@@ -14,7 +22,15 @@ export const getPending = async () => {
 export const getCompleted = async () => {
   try {
     const response = await api.get(ENDPOINTS.APPRAISALS.COMPLETED);
-    return Array.isArray(response.data) ? response.data : [];
+    // Map backend field names to frontend expected names
+    const appraisals = Array.isArray(response.data) ? response.data.map(item => ({
+      ...item,
+      name: item.name || item.appraisalType || 'Standard',
+      type: item.type || item.appraisalType || 'Standard',
+      description: item.description || item.iaDescription || 'No description available',
+      customer_name: item.customer_name || item.customerName || 'Unknown'
+    })) : [];
+    return appraisals;
   } catch (error) {
     console.error('Error details:', error);
     throw new Error(error.message || 'Failed to fetch completed appraisals');
