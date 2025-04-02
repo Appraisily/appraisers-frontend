@@ -11,6 +11,10 @@ export const API_ROUTES = {
     DETAILS: '/api/appraisals/:id/list',
     DETAILS_EDIT: '/api/appraisals/:id/list-edit',
     COMPLETE_PROCESS: '/api/appraisals/:id/complete-process',
-    SET_VALUE: '/api/appraisals/:id/set-value'
+    SET_VALUE: '/api/appraisals/:id/set-value',
+    PDF_STEPS: '/api/pdf/steps',
+    GENERATE_PDF_STEPS: '/api/pdf/generate-pdf-steps',
+    PROCESS_STEPS: '/api/appraisals/steps',
+    PROCESS_FROM_STEP: '/api/appraisals/:id/process-from-step'
   }
 };

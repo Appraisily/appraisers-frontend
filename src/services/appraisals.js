@@ -50,52 +50,114 @@ export const getDetailsForEdit = async (id) => {
   }
 };
 
-export const getBySessionId = async (sessionId) => {
+export const updateAppraisal = async (id, data) => {
   try {
-    console.log('appraisalService: Fetching appraisal by sessionId:', sessionId);
-    const response = await api.get(`${ENDPOINTS.APPRAISALS.LIST}?sessionId=${sessionId}`);
-    console.log('appraisalService: Response data:', response.data);
-
-    if (Array.isArray(response.data) && response.data.length > 0) {
-      console.log('appraisalService: Found appraisal:', response.data[0]);
-      return response.data[0];
-    }
-    console.log('appraisalService: No appraisal found for sessionId');
-    throw new Error('Appraisal not found');
-  } catch (error) {
-    console.error('Error fetching appraisal by session ID:', error);
-    console.error('appraisalService: Full error details:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
-    throw new Error(error.message || 'Failed to fetch appraisal');
-  }
-};
-
-export const setValue = async (id, appraisalValue, description) => {
-  try {
-    const response = await api.post(ENDPOINTS.APPRAISALS.SET_VALUE(id), {
-      appraisalValue,
-      description
-    });
+    const response = await api.put(`${ENDPOINTS.APPRAISALS.LIST}/${id}`, data);
     return response.data;
   } catch (error) {
-    console.error('Error details:', error);
+    console.error('Error updating appraisal:', error);
     throw new Error(error.message || 'Failed to update appraisal');
   }
 };
 
-export const completeAppraisal = async (id, appraisalValue, description, appraisalType) => {
+export const updatePendingAppraisal = async (data) => {
   try {
-    const response = await api.post(ENDPOINTS.APPRAISALS.COMPLETE(id), {
+    const response = await api.post(`${ENDPOINTS.APPRAISALS.LIST}/pending`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating pending appraisal:', error);
+    throw new Error(error.message || 'Failed to update pending appraisal');
+  }
+};
+
+export const setValue = async (id, appraisalValue, description, isEdit) => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.SET_VALUE(id), {
+      appraisalValue,
+      description,
+      isEdit
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error setting value:', error);
+    throw new Error(error.message || 'Failed to set appraisal value');
+  }
+};
+
+export const proposeValue = async (appraiserDescription, customerDescription, aiDescription) => {
+  try {
+    const response = await api.post(`${ENDPOINTS.APPRAISALS.LIST}/propose-value`, {
+      appraiserDescription,
+      customerDescription,
+      aiDescription
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error proposing value:', error);
+    throw new Error(error.message || 'Failed to propose appraisal value');
+  }
+};
+
+export const completeProcess = async (id, appraisalValue, description, appraisalType) => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.COMPLETE_PROCESS(id), {
       appraisalValue,
       description,
       appraisalType
     });
     return response.data;
   } catch (error) {
-    console.error('Error details:', error);
-    throw new Error(error.message || 'Failed to complete appraisal');
+    console.error('Error completing process:', error);
+    throw new Error(error.message || 'Failed to complete appraisal process');
+  }
+};
+
+// New methods for step-specific processing
+
+export const getPdfSteps = async () => {
+  try {
+    const response = await api.get(ENDPOINTS.APPRAISALS.PDF_STEPS);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching PDF steps:', error);
+    throw new Error(error.message || 'Failed to fetch PDF steps');
+  }
+};
+
+export const generatePdfSteps = async (postId, sessionId, startStep, options) => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.GENERATE_PDF_STEPS, {
+      postId,
+      session_ID: sessionId,
+      startStep,
+      options
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error generating PDF with steps:', error);
+    throw new Error(error.message || 'Failed to generate PDF with steps');
+  }
+};
+
+export const getProcessSteps = async () => {
+  try {
+    const response = await api.get(ENDPOINTS.APPRAISALS.PROCESS_STEPS);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching process steps:', error);
+    throw new Error(error.message || 'Failed to fetch process steps');
+  }
+};
+
+export const processFromStep = async (id, startStep, options) => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.PROCESS_FROM_STEP.replace(':id', id), {
+      startStep,
+      options
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error processing from step:', error);
+    throw new Error(error.message || 'Failed to process from step');
   }
 };

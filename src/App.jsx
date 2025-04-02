@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import AppraisalPage from './pages/AppraisalPage';
 import EditAppraisalPage from './pages/EditAppraisalPage';
 import BulkAppraisalPage from './pages/BulkAppraisalPage';
+import CompletedAppraisalPage from './pages/CompletedAppraisalPage';
 import './App.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/appraisal" element={<AppraisalPage />} />
         <Route path="/edit-appraisal" element={<EditAppraisalPage />} />
         <Route path="/bulk-appraisal" element={<BulkAppraisalPage />} />
+        <Route path="/completed-appraisal" element={<CompletedAppraisalPage />} />
       </Routes>
     </div>
   );
