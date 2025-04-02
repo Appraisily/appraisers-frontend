@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as appraisalService from '../services/appraisals';
 import { checkAuth } from '../services/auth';
-import { useWebSocketUpdates } from '../services/websocket';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Controls from '../components/Controls';
@@ -10,7 +9,6 @@ import AppraisalsTable from '../components/AppraisalsTable';
 import PaginationControls from '../components/PaginationControls';
 import LoginForm from '../components/LoginForm';
 import LoadingSpinner from '../components/LoadingSpinner';
-import StatusUpdateToast from '../components/StatusUpdateToast';
 import Logo from '../components/Logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import './Dashboard.css';
@@ -23,18 +21,8 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [activeToast, setActiveToast] = useState(null);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
-  
-  // WebSocket status updates
-  const { 
-    isConnected, 
-    statusUpdates, 
-    connectionError,
-    clearStatusUpdate,
-    reconnect
-  } = useWebSocketUpdates();
 
   useEffect(() => {
     if (checkAuth()) {
@@ -44,56 +32,16 @@ const Dashboard = () => {
     }
   }, [currentAppraisalType]);
 
-  // Process real-time updates from WebSocket
+  // Add a refresh interval to check for updates periodically
   useEffect(() => {
-    if (statusUpdates.length > 0) {
-      // Get the first update to process
-      const update = statusUpdates[0];
-      
-      // Show toast notification for status change
-      setActiveToast(update);
-      
-      // Update the appraisal in the list if it exists
-      setAppraisalsList(prevList => {
-        const updatedList = prevList.map(appraisal => {
-          if (appraisal.id === update.id) {
-            return { ...appraisal, ...update };
-          }
-          return appraisal;
-        });
-        
-        // If the appraisal wasn't in the list and it matches the current type, add it
-        const exists = updatedList.some(appraisal => appraisal.id === update.id);
-        if (!exists && 
-            ((currentAppraisalType === 'pending' && update.status !== 'completed') || 
-             (currentAppraisalType === 'completed' && update.status === 'completed'))) {
-          return [...updatedList, update];
-        }
-        
-        return updatedList;
-      });
-      
-      // Also update the allAppraisals state for search functionality
-      setAllAppraisals(prevList => {
-        const updatedList = prevList.map(appraisal => {
-          if (appraisal.id === update.id) {
-            return { ...appraisal, ...update };
-          }
-          return appraisal;
-        });
-        
-        const exists = updatedList.some(appraisal => appraisal.id === update.id);
-        if (!exists) {
-          return [...updatedList, update];
-        }
-        
-        return updatedList;
-      });
-      
-      // Clear the processed update
-      clearStatusUpdate(update.id);
-    }
-  }, [statusUpdates, currentAppraisalType, clearStatusUpdate]);
+    const refreshInterval = setInterval(() => {
+      if (checkAuth()) {
+        loadAppraisals(currentAppraisalType);
+      }
+    }, 60000); // Refresh every minute
+
+    return () => clearInterval(refreshInterval);
+  }, [currentAppraisalType]);
 
   useEffect(() => {
     // Reset to first page when changing appraisal type
@@ -209,9 +157,6 @@ const Dashboard = () => {
           onSearch={handleSearch}
           isRefreshing={loading}
           onRefresh={() => loadAppraisals(currentAppraisalType)}
-          isWebSocketConnected={isConnected}
-          webSocketError={connectionError}
-          onReconnectWebSocket={reconnect}
         />
 
         <div className="relative">
@@ -254,14 +199,6 @@ const Dashboard = () => {
       </main>
 
       <Footer />
-      
-      {/* Status update toast notification */}
-      {activeToast && (
-        <StatusUpdateToast 
-          update={activeToast} 
-          onClose={() => setActiveToast(null)} 
-        />
-      )}
     </div>
   );
 };
