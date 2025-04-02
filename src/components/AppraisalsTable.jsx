@@ -193,10 +193,10 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               <TableCell>
                 <div className="flex flex-col">
                   <span className="text-xs">
-                    {parseDate(appraisal.date).toLocaleDateString()}
+                    {parseDate(appraisal.date) ? parseDate(appraisal.date).toLocaleDateString() : 'N/A'}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {getRelativeTime(appraisal.date)}
+                    {appraisal.date ? getRelativeTime(appraisal.date) : ''}
                   </span>
                 </div>
               </TableCell>

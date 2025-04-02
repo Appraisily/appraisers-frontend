@@ -54,17 +54,29 @@ export const useWebSocketUpdates = () => {
     console.log(`Connecting to WebSocket at ${wsUrl} (Attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`);
     
     try {
-      const socket = new WebSocket(wsUrl);
-      socketRef.current = socket;
+      // Make WebSocket connection non-critical
+      let socket;
+      try {
+        socket = new WebSocket(wsUrl);
+        socketRef.current = socket;
+      } catch (wsError) {
+        console.warn('Failed to create WebSocket connection:', wsError);
+        setConnectionError('WebSocket initialization failed - real-time updates will be disabled');
+        return; // Exit early without attempting further connection
+      }
       
       // Set connection timeout to abort if taking too long
       const connectionTimeout = setTimeout(() => {
-        if (socket && socket.readyState !== WebSocket.OPEN) {
-          console.warn('WebSocket connection timeout');
-          socket.close();
-          
-          setConnectionError('Connection timeout. Please check your network connection.');
-          handleReconnect();
+        try {
+          if (socket && socket.readyState !== WebSocket.OPEN) {
+            console.warn('WebSocket connection timeout');
+            socket.close();
+            
+            setConnectionError('Connection timeout. Real-time updates disabled.');
+            handleReconnect();
+          }
+        } catch (e) {
+          console.warn('Error during WebSocket timeout handling:', e);
         }
       }, 10000);
       
@@ -76,6 +88,7 @@ export const useWebSocketUpdates = () => {
       };
 
       socket.onmessage = (event) => {
+        // Prevent any WebSocket message handling from crashing the app
         try {
           const data = JSON.parse(event.data);
           
@@ -89,41 +102,52 @@ export const useWebSocketUpdates = () => {
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
+          // Don't let message errors affect the app
         }
       };
 
       socket.onclose = (event) => {
-        console.log(`WebSocket connection closed: ${event.code} - ${event.reason || 'No reason provided'}`);
-        setIsConnected(false);
-        clearTimeout(connectionTimeout);
-        
-        // Don't attempt to reconnect if closed normally
-        if (event.code !== 1000) {
-          handleReconnect();
+        try {
+          console.log(`WebSocket connection closed: ${event.code} - ${event.reason || 'No reason provided'}`);
+          setIsConnected(false);
+          clearTimeout(connectionTimeout);
+          
+          // Don't attempt to reconnect if closed normally
+          if (event.code !== 1000) {
+            handleReconnect();
+          }
+        } catch (error) {
+          console.warn('Error in WebSocket onclose handler:', error);
+          // Don't let close errors affect the app
         }
       };
 
       socket.onerror = (error) => {
-        clearTimeout(connectionTimeout);
-        
-        // Check if error is due to mixed content (HTTPS page trying to connect to WS)
-        const isMixedContentError = window.location.protocol === 'https:' && wsUrl.startsWith('ws:');
-        if (isMixedContentError) {
-          setConnectionError('Mixed content error: Cannot connect to insecure WebSocket (WS) from a secure page (HTTPS). Server must support WSS.');
-          console.error('Mixed content error - secure page cannot connect to insecure WebSocket:', error);
-        } else {
-          setConnectionError('Connection error. Please check your network connection.');
-          console.error('WebSocket error:', error);
+        try {
+          clearTimeout(connectionTimeout);
+          
+          // Check if error is due to mixed content (HTTPS page trying to connect to WS)
+          const isMixedContentError = window.location.protocol === 'https:' && wsUrl.startsWith('ws:');
+          if (isMixedContentError) {
+            setConnectionError('Mixed content error: WebSocket connection not available');
+            console.error('Mixed content error - secure page cannot connect to insecure WebSocket:', error);
+          } else {
+            setConnectionError('WebSocket connection error - real-time updates disabled');
+            console.error('WebSocket error:', error);
+          }
+          
+          setIsConnected(false);
+          
+          // Only attempt to close if the socket is still open
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.close();
+          }
+          
+          handleReconnect();
+        } catch (error) {
+          console.warn('Error in WebSocket onerror handler:', error);
+          // Don't let error handling errors affect the app
         }
-        
-        setIsConnected(false);
-        
-        // Only attempt to close if the socket is still open
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.close();
-        }
-        
-        handleReconnect();
       };
       
     } catch (error) {
@@ -135,23 +159,38 @@ export const useWebSocketUpdates = () => {
   
   // Handle reconnection with exponential backoff
   const handleReconnect = () => {
-    reconnectAttemptsRef.current += 1;
-    
-    if (reconnectAttemptsRef.current <= maxReconnectAttempts) {
-      // Exponential backoff: 1s, 2s, 4s, 8s, 16s
-      const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 16000);
+    try {
+      reconnectAttemptsRef.current += 1;
       
-      console.log(`Scheduling reconnect attempt in ${delay}ms`);
-      
-      reconnectTimeoutRef.current = setTimeout(() => {
-        // Only attempt to reconnect if the page is visible
-        if (document.visibilityState !== 'hidden') {
-          connect();
+      if (reconnectAttemptsRef.current <= maxReconnectAttempts) {
+        // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 16000);
+        
+        console.log(`Scheduling reconnect attempt in ${delay}ms`);
+        
+        // Clear any existing timeout first
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
         }
-      }, delay);
-    } else {
-      console.error(`Maximum reconnection attempts (${maxReconnectAttempts}) reached`);
-      setConnectionError(`Failed to connect after ${maxReconnectAttempts} attempts. Please refresh the page.`);
+        
+        reconnectTimeoutRef.current = setTimeout(() => {
+          try {
+            // Only attempt to reconnect if the page is visible
+            if (document.visibilityState !== 'hidden') {
+              connect();
+            }
+          } catch (error) {
+            console.warn('Error during WebSocket reconnect attempt:', error);
+            // If reconnect fails, just disable WebSockets silently
+          }
+        }, delay);
+      } else {
+        console.log(`Maximum reconnection attempts (${maxReconnectAttempts}) reached`);
+        setConnectionError(`WebSocket not available - real-time updates disabled`);
+      }
+    } catch (error) {
+      console.warn('Error in WebSocket reconnect handler:', error);
+      // Don't let reconnect errors affect the app
     }
   };
 
