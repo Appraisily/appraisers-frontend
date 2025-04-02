@@ -174,7 +174,11 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
         </TableHeader>
         <TableBody>
           {sortedAppraisals.map((appraisal) => (
-            <TableRow key={appraisal.id} className="hover:bg-muted/50">
+            <TableRow 
+              key={appraisal.id} 
+              className="hover:bg-muted/50 cursor-pointer"
+              onClick={() => viewAppraisal(appraisal.id)}
+            >
               <TableCell className="font-mono text-xs">
                 {getShortId(appraisal.identifier || appraisal.id)}
               </TableCell>
@@ -184,7 +188,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               </TableCell>
               <TableCell>
                 <div className="text-sm truncate max-w-[280px]">
-                  {appraisal.description || appraisal.iaDescription || 'No description available'}
+                  {appraisal.description || appraisal.iaDescription || appraisal.customerDescription || appraisal.appraisersDescription || 'No description available'}
                 </div>
               </TableCell>
               <TableCell>
@@ -206,7 +210,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
                   <span>{appraisal.customer_name || appraisal.customerName || 'Unknown'}</span>
                 </div>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                 {getActionButtons(appraisal)}
               </TableCell>
             </TableRow>

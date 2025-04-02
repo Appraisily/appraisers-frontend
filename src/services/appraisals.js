@@ -5,13 +5,22 @@ export const getPending = async () => {
   try {
     const response = await api.get(ENDPOINTS.APPRAISALS.LIST);
     // Map backend field names to frontend expected names
-    const appraisals = Array.isArray(response.data) ? response.data.map(item => ({
-      ...item,
-      name: item.name || item.appraisalType || 'Standard',
-      type: item.type || item.appraisalType || 'Standard',
-      description: item.description || item.iaDescription || 'No description available',
-      customer_name: item.customer_name || item.customerName || 'Unknown'
-    })) : [];
+    const appraisals = Array.isArray(response.data) ? response.data.map(item => {
+      // Prioritize descriptions in this order: customer > ia > appraiser
+      const bestDescription = 
+        (item.customerDescription && item.customerDescription.trim()) ||
+        (item.iaDescription && item.iaDescription.trim()) || 
+        (item.appraisersDescription && item.appraisersDescription.trim()) ||
+        'No description available';
+      
+      return {
+        ...item,
+        name: item.name || item.appraisalType || 'Standard',
+        type: item.type || item.appraisalType || 'Standard',
+        description: bestDescription,
+        customer_name: item.customer_name || item.customerName || 'Unknown'
+      };
+    }) : [];
     return appraisals;
   } catch (error) {
     console.error('Error details:', error);
@@ -23,13 +32,22 @@ export const getCompleted = async () => {
   try {
     const response = await api.get(ENDPOINTS.APPRAISALS.COMPLETED);
     // Map backend field names to frontend expected names
-    const appraisals = Array.isArray(response.data) ? response.data.map(item => ({
-      ...item,
-      name: item.name || item.appraisalType || 'Standard',
-      type: item.type || item.appraisalType || 'Standard',
-      description: item.description || item.iaDescription || 'No description available',
-      customer_name: item.customer_name || item.customerName || 'Unknown'
-    })) : [];
+    const appraisals = Array.isArray(response.data) ? response.data.map(item => {
+      // Prioritize descriptions in this order: customer > ia > appraiser
+      const bestDescription = 
+        (item.customerDescription && item.customerDescription.trim()) ||
+        (item.iaDescription && item.iaDescription.trim()) || 
+        (item.appraisersDescription && item.appraisersDescription.trim()) ||
+        'No description available';
+      
+      return {
+        ...item,
+        name: item.name || item.appraisalType || 'Standard',
+        type: item.type || item.appraisalType || 'Standard',
+        description: bestDescription,
+        customer_name: item.customer_name || item.customerName || 'Unknown'
+      };
+    }) : [];
     return appraisals;
   } catch (error) {
     console.error('Error details:', error);
