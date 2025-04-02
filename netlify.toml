@@ -2,23 +2,17 @@
   command = "npm run build"
   publish = "dist"
 
+# Environment variables should be set in the Netlify UI
+# Do not commit sensitive values to this file
+
 [context.production.environment]
-  VITE_BACKEND_URL = "https://appraisers-backend-856401495068.us-central1.run.app"
-  VITE_GOOGLE_CLIENT_ID = "856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
-  VITE_WS_URL = "wss://appraisers-backend-856401495068.us-central1.run.app/ws"
   VITE_APP_ENV = "production"
 
 [context.development.environment]
-  VITE_BACKEND_URL = "https://appraisers-backend-856401495068.us-central1.run.app"
-  VITE_GOOGLE_CLIENT_ID = "856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
-  VITE_WS_URL = "wss://appraisers-backend-856401495068.us-central1.run.app/ws"
   VITE_APP_ENV = "development"
 
 [context.deploy-preview.environment]
-  VITE_BACKEND_URL = "https://appraisers-backend-856401495068.us-central1.run.app"
-  VITE_GOOGLE_CLIENT_ID = "856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com"
   VITE_APP_ENV = "development"
-  VITE_FALLBACK_LOGIN = "true"
 
 [[redirects]]
   from = "/*"
