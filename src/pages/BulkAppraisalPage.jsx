@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { ENDPOINTS } from '../config/endpoints';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BackButton from '../components/BackButton';
@@ -36,7 +37,7 @@ const BulkAppraisalPage = () => {
 
   const loadAppraisalDetails = async () => {
     try {
-      const response = await api.get(`/api/appraisals/${appraisalId}`);
+      const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS(appraisalId));
       console.log('Appraisal details response:', response.data);
       setAppraisalDetails(response.data);
     } catch (err) {
@@ -53,11 +54,10 @@ const BulkAppraisalPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const endpoint = `/api/appraisals/${appraisalId}/bulk-images`;
+      const endpoint = ENDPOINTS.APPRAISALS.BULK_IMAGES(appraisalId);
       console.log('Fetching bulk images:', {
         endpoint,
-        appraisalId,
-        fullUrl: `${import.meta.env.VITE_BACKEND_URL}${endpoint}`
+        appraisalId
       });
       
       const response = await api.get(endpoint);
@@ -182,7 +182,7 @@ const BulkAppraisalPage = () => {
       };
       console.log('Sending process request with payload:', processPayload);
 
-      const response = await api.post(`/api/appraisals/${appraisalId}/process-bulk`, processPayload);
+      const response = await api.post(ENDPOINTS.APPRAISALS.PROCESS_BULK(appraisalId), processPayload);
 
       console.log('Process response:', response.data);
 

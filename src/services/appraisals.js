@@ -112,6 +112,20 @@ export const completeProcess = async (id, appraisalValue, description, appraisal
   }
 };
 
+export const completeAppraisal = async (id, appraisalValue, description, appraisalType) => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.COMPLETE(id), {
+      appraisalValue,
+      description,
+      appraisalType
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error completing appraisal:', error);
+    throw new Error(error.message || 'Failed to complete appraisal');
+  }
+};
+
 // New methods for step-specific processing
 
 export const getPdfSteps = async () => {
@@ -159,5 +173,18 @@ export const processFromStep = async (id, startStep, options) => {
   } catch (error) {
     console.error('Error processing from step:', error);
     throw new Error(error.message || 'Failed to process from step');
+  }
+};
+
+export const getBySessionId = async (sessionId) => {
+  try {
+    const response = await api.get(ENDPOINTS.APPRAISALS.BY_SESSION_ID(sessionId));
+    if (!response.data) {
+      throw new Error('No data returned for session ID');
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching appraisal by session ID:', error);
+    throw new Error(error.message || 'Failed to fetch appraisal by session ID');
   }
 };

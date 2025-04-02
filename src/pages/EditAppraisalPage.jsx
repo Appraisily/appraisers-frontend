@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BackButton from '../components/BackButton';
@@ -21,9 +21,8 @@ const EditAppraisalPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(
-        ENDPOINTS.APPRAISALS.DETAILS(appraisalId),
-        { withCredentials: true }
+      const response = await api.get(
+        ENDPOINTS.APPRAISALS.DETAILS(appraisalId)
       );
       setAppraisalData(response.data);
     } catch (err) {
@@ -54,10 +53,9 @@ const EditAppraisalPage = () => {
         [fieldName]: newValue
       };
 
-      const response = await axios.post(
+      const response = await api.post(
         ENDPOINTS.APPRAISALS.SET_VALUE(appraisalId),
-        updateData,
-        { withCredentials: true }
+        updateData
       );
 
       if (response.data.success) {
