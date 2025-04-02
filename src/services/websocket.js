@@ -20,9 +20,24 @@ export const useWebSocketUpdates = () => {
     // Determine the correct WebSocket protocol based on the current page protocol
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     
-    // Get WebSocket URL from environment variables or construct it securely
-    const wsUrl = import.meta.env.VITE_WS_URL || 
-      `${wsProtocol}//${window.location.hostname}${import.meta.env.VITE_BACKEND_PORT ? ':' + import.meta.env.VITE_BACKEND_PORT : ''}/ws`;
+    // Get WebSocket URL from environment variables or fallback to backend URL
+    let wsUrl = '';
+    if (import.meta.env.VITE_WS_URL) {
+      wsUrl = import.meta.env.VITE_WS_URL;
+    } else if (import.meta.env.VITE_BACKEND_URL) {
+      // Replace http/https with ws/wss and add /ws path
+      wsUrl = import.meta.env.VITE_BACKEND_URL.replace(/^http/, 'ws') + '/ws';
+    } else {
+      // Fallback to same-origin WebSocket
+      wsUrl = `${wsProtocol}//${window.location.hostname}${import.meta.env.VITE_BACKEND_PORT ? ':' + import.meta.env.VITE_BACKEND_PORT : ''}/ws`;
+    }
+    
+    // Disable WebSocket for now if connecting to appraisily.com (known issue)
+    if (wsUrl.includes('appraisily.com')) {
+      console.log('WebSocket temporarily disabled for appraisily.com domain');
+      setConnectionError('WebSocket connections temporarily disabled');
+      return; // Skip connection attempt
+    }
     
     // Don't attempt to reconnect if we already have an open connection
     if (socketRef.current?.readyState === WebSocket.OPEN) {

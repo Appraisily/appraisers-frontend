@@ -9,11 +9,21 @@ const GoogleSignIn = () => {
         return;
       }
 
-      window.google.accounts.id.initialize({
-        client_id: '856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com',
-        callback: handleCredentialResponse,
-        auto_prompt: false
-      });
+      try {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 
+                        '856401495068-ica4bncmu5t8i0muugrn9t8t25nt1hb4.apps.googleusercontent.com';
+        
+        console.log('Initializing Google Sign-In with client ID:', clientId);
+        
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleCredentialResponse,
+          auto_prompt: false,
+          cancel_on_tap_outside: true
+        });
+      } catch (error) {
+        console.error('Error initializing Google Sign-In:', error);
+      }
 
       window.google.accounts.id.renderButton(
         document.getElementById('g_id_signin'),
