@@ -70,6 +70,9 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
         if (details.appraisalType) {
           console.log('Setting appraisal type:', details.appraisalType);
           setAppraisalType(details.appraisalType);
+        } else {
+          // Default to Regular if not set
+          setAppraisalType('Regular');
         }
 
         if (details.value) {
@@ -78,12 +81,19 @@ const AppraisalForm = ({ appraisalId, onSuccess }) => {
         }
         
         // Check all possible field names for description
+        // First check appraisers description, then acf fields from WordPress
         const descriptionValue = details.appraisersDescription || 
                                 details.appraiserDescription || 
-                                details.description;
+                                details.description ||
+                                (details.acfFields && details.acfFields.description);
+                                
         if (descriptionValue) {
           console.log('Setting description:', descriptionValue);
           setDescription(descriptionValue);
+        } else if (details.customerDescription) {
+          // If no appraiser description, use customer description as a starting point
+          console.log('Using customer description as starting point:', details.customerDescription);
+          setDescription(details.customerDescription);
         }
       } catch (err) {
         console.error('Error fetching appraisal details:', err);

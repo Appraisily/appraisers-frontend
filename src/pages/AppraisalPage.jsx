@@ -77,46 +77,37 @@ const AppraisalPage = () => {
         }
       }
 
-      // If no WordPress URL, show manual form immediately
-      if (!wpUrl) {
-        setShowManualForm(true);
-        setLoading(false);
-        setAppraisalData({
-          customerEmail: customerEmail || '',
-          customerName: customerName || '',
-          sessionId: sessionId || '',
-          customerDescription: '',
-          iaDescription: '',
-          images: {}
-        });
-        console.log('No WordPress URL - showing manual form');
-        return;
-      }
-
       try {
         setLoading(true);
         setError(null);
 
-        const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS(appraisalId));
+        // First get the basic appraisal data from the spreadsheet, including the WordPress URL
+        const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS_EDIT(appraisalId));
         console.log('API Response:', response.data);
         
         if (mounted && response.data) {
           setAppraisalData(response.data);
-          setShowManualForm(false);
+          
+          // If the appraisal has a WordPress URL, use the normal form to complete the appraisal
+          // Otherwise use the manual form to upload images and create a post
+          const hasWordPressUrl = response.data.wordpressUrl && response.data.wordpressUrl.trim() !== '';
+          setShowManualForm(!hasWordPressUrl);
+          
+          console.log('WordPress URL found:', hasWordPressUrl ? response.data.wordpressUrl : 'Not available');
         }
       } catch (err) {
         console.log('API Error:', err.response?.status, err.message);
         if (mounted) {
           const errorMessage = err.response?.status === 500 
-            ? `WordPress data not available at URL: ${wpUrl || 'Not provided'}. Please enter information manually.` 
+            ? `WordPress data not available. Please enter information manually.` 
             : err.message || 'Error fetching appraisal details';
           
           setError(errorMessage);
           
           if (err.response?.status === 401) {
             navigate('/');
-          } else if (err.response?.status === 500) {
-            console.log('500 error - showing manual form');
+          } else {
+            console.log('Error - showing manual form');
             setShowManualForm(true);
             setAppraisalData({
               customerEmail: customerEmail || '',
@@ -140,7 +131,7 @@ const AppraisalPage = () => {
     return () => {
       mounted = false;
     };
-  }, [appraisalId, wpUrl, navigate]);
+  }, [appraisalId, wpUrl, navigate, customerEmail, customerName, sessionId]);
 
   const handleSuccess = () => {
     setSuccess('Appraisal submitted successfully. Redirecting to dashboard...');
@@ -204,10 +195,19 @@ const AppraisalPage = () => {
                 {showManualForm ? (
                   <>
                     <div className="text-center mb-4">
-                      <h3 className="text-lg font-semibold mb-2">WordPress Data Unavailable</h3>
+                      <h3 className="text-lg font-semibold mb-2">Appraisal Information</h3>
                       <p className="text-muted-foreground">
-                        Unable to fetch data from WordPress URL: <code className="px-2 py-1 bg-slate-100 rounded">{wpUrl || 'Not provided'}</code>
-                        <br />Please enter the appraisal information manually.
+                        {appraisalData?.wordpressUrl ? (
+                          <>
+                            Unable to fetch data from WordPress URL: <code className="px-2 py-1 bg-slate-100 rounded">{appraisalData.wordpressUrl}</code>
+                            <br />Please enter the appraisal information manually.
+                          </>
+                        ) : (
+                          <>
+                            No WordPress post found for this appraisal.
+                            <br />Please upload images and enter details to create a new appraisal post.
+                          </>
+                        )}
                       </p>
                     </div>
                     <ManualAppraisalForm
