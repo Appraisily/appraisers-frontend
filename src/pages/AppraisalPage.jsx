@@ -82,18 +82,45 @@ const AppraisalPage = () => {
         setError(null);
 
         // First get the basic appraisal data from the spreadsheet, including the WordPress URL
-        const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS_EDIT(appraisalId));
-        console.log('API Response:', response.data);
-        
-        if (mounted && response.data) {
-          setAppraisalData(response.data);
+        try {
+          const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS_EDIT(appraisalId));
+          console.log('API Response:', response.data);
           
-          // If the appraisal has a WordPress URL, use the normal form to complete the appraisal
-          // Otherwise use the manual form to upload images and create a post
-          const hasWordPressUrl = response.data.wordpressUrl && response.data.wordpressUrl.trim() !== '';
-          setShowManualForm(!hasWordPressUrl);
+          if (mounted && response.data) {
+            setAppraisalData(response.data);
+            
+            // If the appraisal has a WordPress URL, use the normal form to complete the appraisal
+            // Otherwise use the manual form to upload images and create a post
+            const hasWordPressUrl = response.data.wordpressUrl && response.data.wordpressUrl.trim() !== '';
+            setShowManualForm(!hasWordPressUrl);
+            
+            console.log('WordPress URL found:', hasWordPressUrl ? response.data.wordpressUrl : 'Not available');
+          }
+        } catch (editError) {
+          console.log('Error with DETAILS_EDIT endpoint:', editError.response?.status);
           
-          console.log('WordPress URL found:', hasWordPressUrl ? response.data.wordpressUrl : 'Not available');
+          // If we get a 404 error, this might be a completed appraisal
+          if (editError.response?.status === 404) {
+            console.log('Appraisal not found in pending sheet, checking if completed...');
+            
+            // Try to check if this is a completed appraisal by making a request to the completed endpoint
+            try {
+              await api.get(ENDPOINTS.APPRAISALS.COMPLETED_DETAILS(appraisalId));
+              console.log('Appraisal found in completed sheet, redirecting to completed-appraisal page');
+              
+              // If successful, redirect to the completed-appraisal page
+              if (mounted) {
+                navigate(`/completed-appraisal?id=${appraisalId}`, { replace: true });
+                return; // Exit early after redirect
+              }
+            } catch (checkError) {
+              // If this also fails, it's truly not found anywhere
+              console.log('Appraisal not found in completed sheet either:', checkError);
+              throw editError; // Re-throw the original error to continue with error handling
+            }
+          } else {
+            throw editError; // Re-throw the original error to continue with error handling
+          }
         }
       } catch (err) {
         console.log('API Error:', err.response?.status, err.message);
