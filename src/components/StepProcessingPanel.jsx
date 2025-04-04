@@ -11,10 +11,19 @@ import * as appraisalService from '../services/appraisals';
 const StepProcessingPanel = ({ appraisalId, appraisalType, onComplete }) => {
   const [pdfSteps, setPdfSteps] = useState([]);
   const [processSteps, setProcessSteps] = useState([]);
+  const [reprocessingSteps, setReprocessingSteps] = useState([
+    'enhance_description',
+    'update_wordpress',
+    'generate_html',
+    'generate_pdf',
+    'regenerate_statistics'
+  ]);
   const [selectedPdfStep, setSelectedPdfStep] = useState('');
   const [selectedProcessStep, setSelectedProcessStep] = useState('');
+  const [selectedReprocessStep, setSelectedReprocessStep] = useState('enhance_description');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isReprocessing, setIsReprocessing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [loadingSteps, setLoadingSteps] = useState(true);
@@ -128,6 +137,37 @@ const StepProcessingPanel = ({ appraisalId, appraisalType, onComplete }) => {
       setError(error.message || 'Failed to process from selected step. Please try again.');
     } finally {
       setIsProcessing(false);
+    }
+  };
+  
+  const handleReprocessStep = async () => {
+    if (!selectedReprocessStep || !appraisalId) return;
+
+    try {
+      setIsReprocessing(true);
+      setError(null);
+      setResult(null);
+
+      const response = await appraisalService.reprocessStep(
+        appraisalId,
+        selectedReprocessStep
+      );
+
+      setResult({
+        type: 'reprocess',
+        success: response.success,
+        message: response.message || `Successfully reprocessed step: ${selectedReprocessStep}`,
+        result: response.result
+      });
+
+      if (onComplete) {
+        onComplete(`Successfully reprocessed step: ${selectedReprocessStep}`);
+      }
+    } catch (error) {
+      console.error('Error reprocessing step:', error);
+      setError(error.message || 'Failed to reprocess selected step. Please try again.');
+    } finally {
+      setIsReprocessing(false);
     }
   };
 
@@ -266,6 +306,46 @@ const StepProcessingPanel = ({ appraisalId, appraisalType, onComplete }) => {
               </div>
             </div>
           )}
+
+          <Separator className="my-6" />
+
+          {/* Step Reprocessing Section */}
+          <div>
+            <h3 className="text-lg font-medium">Individual Step Reprocessing</h3>
+            <p className="text-sm text-gray-500 mb-4">Reprocess a specific step without running the full workflow</p>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reprocessStep">Select Step to Reprocess</Label>
+                <Select
+                  disabled={isReprocessing}
+                  value={selectedReprocessStep}
+                  onValueChange={setSelectedReprocessStep}
+                >
+                  <SelectTrigger id="reprocessStep" className="w-full">
+                    <SelectValue placeholder="Select a step..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {reprocessingSteps.map((step) => (
+                      <SelectItem key={step} value={step}>
+                        {step.replace(/_/g, ' ').split(' ').map(word => 
+                          word.charAt(0).toUpperCase() + word.slice(1)
+                        ).join(' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button 
+                onClick={handleReprocessStep} 
+                disabled={!selectedReprocessStep || isReprocessing}
+                className="w-full"
+              >
+                {isReprocessing ? "Reprocessing..." : "Reprocess Step"}
+              </Button>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

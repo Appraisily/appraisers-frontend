@@ -43,8 +43,16 @@ const CompletedAppraisalPage = () => {
       setLoading(true);
       setError(null);
       
-      const data = await appraisalService.getDetails(appraisalId);
-      setAppraisal(data);
+      // Try to get details using the new completed appraisal details endpoint
+      try {
+        const data = await appraisalService.getCompletedAppraisalDetails(appraisalId);
+        setAppraisal(data);
+      } catch (detailsError) {
+        console.error('Error with completed details endpoint, falling back to regular details:', detailsError);
+        // Fall back to the regular details endpoint if the new one fails
+        const fallbackData = await appraisalService.getDetails(appraisalId);
+        setAppraisal(fallbackData);
+      }
     } catch (error) {
       console.error('Error loading appraisal details:', error);
       setError(error.message || 'Failed to load appraisal details');

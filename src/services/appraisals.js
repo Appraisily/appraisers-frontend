@@ -71,6 +71,19 @@ export const getDetails = async (id) => {
   }
 };
 
+export const getCompletedAppraisalDetails = async (id) => {
+  try {
+    // Use the new endpoint for completed appraisal details
+    const response = await api.get(ENDPOINTS.APPRAISALS.COMPLETED_DETAILS(id));
+    console.log('API Response for getCompletedAppraisalDetails:', response.data);
+    return response.data.appraisalDetails;
+  } catch (error) {
+    console.error('Error fetching completed appraisal details:', error);
+    console.error('Response data:', error.response?.data);
+    throw new Error(error.message || 'Failed to fetch completed appraisal details');
+  }
+};
+
 export const getDetailsForEdit = async (id) => {
   try {
     // Use the edit endpoint that provides additional form values
@@ -207,6 +220,18 @@ export const processFromStep = async (id, startStep, options) => {
   } catch (error) {
     console.error('Error processing from step:', error);
     throw new Error(error.message || 'Failed to process from step');
+  }
+};
+
+export const reprocessStep = async (id, stepName) => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.REPROCESS_STEP(id), {
+      stepName
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error reprocessing step:', error);
+    throw new Error(error.message || 'Failed to reprocess step');
   }
 };
 

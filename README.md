@@ -9,7 +9,7 @@ The Appraisers Dashboard provides a streamlined interface for professional appra
 - Complete new appraisals with detailed information
 - Edit existing appraisal details
 - Manage appraisal metadata and images
-- Receive real-time updates on appraisal status changes
+- Generate comprehensive appraisal reports
 
 ## Key Features
 
@@ -28,13 +28,52 @@ The Appraisers Dashboard provides a streamlined interface for professional appra
   - Interactive image viewer with zoom/pan/rotate
   - Detailed form validation
   - Automatic status updates
-  - Real-time notifications via WebSockets
+  - Step-by-step processing visualization
 
 - **Data Management**
   - ACF fields editing
   - Image URL management
   - Metadata handling
   - Bulk appraisal operations
+
+## Quick Start
+
+### Development Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run linting
+npm run lint
+```
+
+## Project Structure
+
+```
+├── public/              # Static assets
+├── src/
+│   ├── components/      # Reusable UI components
+│   │   └── ui/          # Base UI components (shadcn)
+│   ├── config/          # Application configuration
+│   ├── lib/             # Utility libraries
+│   ├── pages/           # Page components
+│   ├── services/        # API and external services
+│   └── utils/           # Helper functions
+├── index.html           # HTML entry point
+├── package.json         # Dependencies and scripts
+├── tailwind.config.js   # Tailwind CSS configuration
+└── vite.config.js       # Vite bundler configuration
+```
 
 ## API Endpoints
 
@@ -153,43 +192,49 @@ Response:
 }
 ```
 
-## Setup and Installation
+## Configuration
 
-1. Clone the repository:
-```bash
-git clone [repository-url]
-```
+### Environment Variables
 
-2. Install dependencies:
-```bash
-npm install
-```
+Create a `.env` file with the following variables:
 
-3. Create `.env` file with required environment variables:
 ```env
-VITE_BACKEND_URL=https://appraisers-backend-856401495068.us-central1.run.app
+VITE_BACKEND_URL=https://appraisers-backend-url
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
-VITE_WS_URL=wss://your-websocket-endpoint
 ```
 
-4. Start development server:
-```bash
-npm run dev
-```
+## UI Components
 
-5. Build for production:
-```bash
-npm run build
-```
+The application uses a combination of custom components and shadcn/ui components for a consistent design system:
+
+- **Custom Components**
+  - `AppraisalForm`: Form for completing appraisals
+  - `AppraisalsTable`: Table display for appraisal listings
+  - `ImageViewer`: Interactive image viewing component
+  - `StepProcessingPanel`: Visual display of processing steps
+
+- **UI Components** (shadcn/ui)
+  - Button, Card, Input, Select, Checkbox
+  - Table, Tabs, Pagination
+  - Alert, Badge, Tooltip
 
 ## Development
 
 - Built with Vite + React
-- Styled with Tailwind CSS and component-specific CSS
+- Styled with Tailwind CSS
 - Uses React Router for navigation
 - Implements React Zoom Pan Pinch for image manipulation
 - Axios for API communication
-- WebSocket for real-time updates
+
+### Code Style Guidelines
+
+Follow the coding standards defined in [CLAUDE.md](../CLAUDE.md):
+
+- ES6+ JavaScript features
+- React functional components with hooks
+- Named exports preferred
+- 2-space indentation, semicolons required
+- JSDoc comments for complex components and functions
 
 ## Production Deployment
 
