@@ -46,11 +46,13 @@ const CompletedAppraisalPage = () => {
       // Try to get details using the new completed appraisal details endpoint
       try {
         const data = await appraisalService.getCompletedAppraisalDetails(appraisalId);
+        console.log('Completed appraisal data:', data);
         setAppraisal(data);
       } catch (detailsError) {
         console.error('Error with completed details endpoint, falling back to regular details:', detailsError);
         // Fall back to the regular details endpoint if the new one fails
         const fallbackData = await appraisalService.getDetails(appraisalId);
+        console.log('Fallback appraisal data:', fallbackData);
         setAppraisal(fallbackData);
       }
     } catch (error) {
@@ -106,7 +108,7 @@ const CompletedAppraisalPage = () => {
               </TabsList>
               
               <TabsContent value="details" className="mt-6">
-                <AppraisalDetails appraisal={appraisal} />
+                <AppraisalDetails appraisalData={appraisal} />
               </TabsContent>
               
               <TabsContent value="processing" className="mt-6">

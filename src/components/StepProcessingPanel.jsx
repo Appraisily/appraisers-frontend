@@ -147,11 +147,15 @@ const StepProcessingPanel = ({ appraisalId, appraisalType, onComplete }) => {
       setIsReprocessing(true);
       setError(null);
       setResult(null);
+      
+      console.log(`Reprocessing step ${selectedReprocessStep} for appraisal ${appraisalId}`);
 
       const response = await appraisalService.reprocessStep(
         appraisalId,
         selectedReprocessStep
       );
+      
+      console.log('Reprocess step response:', response);
 
       setResult({
         type: 'reprocess',
@@ -165,7 +169,7 @@ const StepProcessingPanel = ({ appraisalId, appraisalType, onComplete }) => {
       }
     } catch (error) {
       console.error('Error reprocessing step:', error);
-      setError(error.message || 'Failed to reprocess selected step. Please try again.');
+      setError(error.message || `Failed to reprocess step: ${selectedReprocessStep}. Please try again.`);
     } finally {
       setIsReprocessing(false);
     }
