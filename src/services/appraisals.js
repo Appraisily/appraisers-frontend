@@ -247,3 +247,18 @@ export const getBySessionId = async (sessionId) => {
     throw new Error(error.message || 'Failed to fetch appraisal by session ID');
   }
 };
+
+// New function to reprocess a completed appraisal
+export const reprocessCompletedAppraisal = async (id) => {
+  try {
+    console.log(`Initiating complete reprocessing for appraisal ${id}`);
+    const response = await api.post(`${API_BASE_URL}/api/appraisals/${id}/reprocess-completed`, {
+      reprocessStatistics: true,
+      regeneratePdf: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error reprocessing completed appraisal:', error);
+    throw new Error(error.message || 'Failed to reprocess completed appraisal');
+  }
+};
