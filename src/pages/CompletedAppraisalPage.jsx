@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,8 @@ import { checkAuth } from '../services/auth';
 import './AppraisalPage.css';
 
 const CompletedAppraisalPage = () => {
-  const [searchParams] = useSearchParams();
+  const { id: appraisalId } = useParams();
   const navigate = useNavigate();
-  const appraisalId = searchParams.get('id');
   
   const [appraisal, setAppraisal] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +30,8 @@ const CompletedAppraisalPage = () => {
     }
 
     if (!appraisalId) {
-      setError('No appraisal ID provided');
+      console.error('No Appraisal ID found in URL path.');
+      setError('No appraisal ID provided in URL.');
       setLoading(false);
       return;
     }
@@ -40,25 +40,26 @@ const CompletedAppraisalPage = () => {
   }, [appraisalId, navigate]);
 
   const loadAppraisalDetails = async () => {
+    if (!appraisalId) return;
+
     try {
       setLoading(true);
       setError(null);
       
-      // Try to get details using the new completed appraisal details endpoint
-      try {
-        const data = await appraisalService.getCompletedAppraisalDetails(appraisalId);
-        console.log('Completed appraisal data:', data);
-        setAppraisal(data);
-      } catch (detailsError) {
-        console.error('Error with completed details endpoint, falling back to regular details:', detailsError);
-        // Fall back to the regular details endpoint if the new one fails
-        const fallbackData = await appraisalService.getDetails(appraisalId);
-        console.log('Fallback appraisal data:', fallbackData);
-        setAppraisal(fallbackData);
-      }
+      const data = await appraisalService.getCompletedAppraisalDetails(appraisalId);
+      console.log('Completed appraisal data:', data);
+      setAppraisal(data);
+      
     } catch (error) {
-      console.error('Error loading appraisal details:', error);
-      setError(error.message || 'Failed to load appraisal details');
+      console.error('Error loading completed appraisal details:', error);
+      if (error.response?.status === 404) {
+         setError(`Completed appraisal not found (ID: ${appraisalId}). It might still be pending or does not exist.`);
+      } else if (error.response?.status === 401) {
+        setError('Unauthorized access.');
+      } else {
+        setError(error.message || 'Failed to load completed appraisal details');
+      }
+      setAppraisal(null);
     } finally {
       setLoading(false);
     }
@@ -66,16 +67,14 @@ const CompletedAppraisalPage = () => {
 
   const handleProcessingComplete = (message) => {
     setSuccessMessage(message);
-    // Optionally refresh the appraisal details
     loadAppraisalDetails();
-    
-    // Clear success message after 5 seconds
     setTimeout(() => {
       setSuccessMessage(null);
     }, 5000);
   };
   
   const handleReprocessCompletedAppraisal = async () => {
+    if (!appraisalId) return;
     try {
       setIsReprocessing(true);
       setError(null);
@@ -86,7 +85,6 @@ const CompletedAppraisalPage = () => {
       
       if (response.success) {
         setSuccessMessage('Appraisal reprocessing initiated. This may take a few minutes to complete.');
-        // Refresh appraisal details after a short delay to give backend time to update
         setTimeout(() => {
           loadAppraisalDetails();
         }, 3000);
@@ -101,97 +99,107 @@ const CompletedAppraisalPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <LoadingSpinner message={`Loading appraisal ${appraisalId}...`} />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error && !appraisal) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <BackButton /> 
+          <Alert variant="destructive" className="mt-6">
+            <AlertTitle>Error Loading Appraisal</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
+  if (!appraisal) {
+      return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6">
+          <BackButton /> 
+          <Alert className="mt-6">
+            <AlertTitle>Appraisal Not Found</AlertTitle>
+            <AlertDescription>Could not find data for appraisal ID: {appraisalId}</AlertDescription>
+          </Alert>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      
       <main className="flex-grow container mx-auto px-4 py-6">
-        <BackButton onClick={() => navigate('/')} />
+        <BackButton />
         
-        <div className="flex justify-between items-center my-6">
-          <h1 className="text-3xl font-bold">Completed Appraisal Tools</h1>
-          {!loading && appraisal && (
-            <Button 
-              onClick={handleReprocessCompletedAppraisal} 
-              disabled={isReprocessing}
-              variant="default"
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isReprocessing ? (
-                <>
-                  <span className="mr-2">Reprocessing...</span>
-                  <LoadingSpinner size="sm" />
-                </>
-              ) : (
-                "Completely Reprocess Appraisal"
-              )}
-            </Button>
-          )}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center my-6 gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">Completed Appraisal Tools</h1>
+          <Button 
+            onClick={handleReprocessCompletedAppraisal} 
+            disabled={isReprocessing}
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          >
+            {isReprocessing ? (
+              <>
+                <LoadingSpinner size="sm" className="mr-2" />
+                <span>Reprocessing...</span>
+              </>
+            ) : (
+              "Completely Reprocess Appraisal"
+            )}
+          </Button>
         </div>
         
-        {!loading && appraisal && (
-          <Alert className="mb-6 bg-blue-50 border-blue-200">
-            <AlertTitle>What does "Completely Reprocess Appraisal" do?</AlertTitle>
-            <AlertDescription>
-              This will trigger a complete reprocessing of the appraisal, including:
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Recomputing all statistics data</li>
-                <li>Generating a new comprehensive statistics summary</li>
-                <li>Rebuilding the PDF report with enhanced data</li>
-                <li>Updating the WordPress post</li>
-              </ul>
-              <p className="mt-2 text-sm text-gray-600">
-                Note: This process may take a few minutes to complete. The page will refresh automatically when done.
-              </p>
-            </AlertDescription>
+        {successMessage && (
+          <Alert className="mb-6 border-green-200 bg-green-50 text-green-700">
+            <AlertTitle>Success</AlertTitle>
+            <AlertDescription>{successMessage}</AlertDescription>
           </Alert>
         )}
+         {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
         
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <LoadingSpinner />
-          </div>
-        ) : error ? (
-          <Alert variant="destructive" className="mb-6">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : appraisal ? (
-          <>
-            {successMessage && (
-              <Alert className="mb-6">
-                <AlertTitle>Success</AlertTitle>
-                <AlertDescription>{successMessage}</AlertDescription>
-              </Alert>
-            )}
-            
-            <Tabs defaultValue="details" className="mb-6">
-              <TabsList>
-                <TabsTrigger value="details">Appraisal Details</TabsTrigger>
-                <TabsTrigger value="processing">Step-by-Step Processing</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="details" className="mt-6">
-                <AppraisalDetails appraisalData={appraisal} />
-              </TabsContent>
-              
-              <TabsContent value="processing" className="mt-6">
-                <StepProcessingPanel 
-                  appraisalId={appraisalId} 
-                  appraisalType={appraisal.type} 
-                  onComplete={handleProcessingComplete} 
-                />
-              </TabsContent>
-            </Tabs>
-          </>
-        ) : (
-          <Alert className="mb-6">
-            <AlertTitle>No Data</AlertTitle>
-            <AlertDescription>No appraisal data found.</AlertDescription>
-          </Alert>
-        )}
+        <Tabs defaultValue="details" className="mb-6">
+          <TabsList className="flex flex-wrap h-auto justify-start">
+            <TabsTrigger value="details">Appraisal Details</TabsTrigger>
+            <TabsTrigger value="processing">Step-by-Step Processing</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="mt-6">
+            <AppraisalDetails appraisalData={appraisal} />
+          </TabsContent>
+          
+          <TabsContent value="processing" className="mt-6">
+            <StepProcessingPanel 
+              appraisalId={appraisalId} 
+              appraisalType={appraisal.type || appraisal.metadata?.object_type} 
+              onComplete={handleProcessingComplete} 
+            />
+          </TabsContent>
+        </Tabs>
       </main>
-      
       <Footer />
     </div>
   );

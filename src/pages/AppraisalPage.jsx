@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -16,42 +16,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 const AppraisalPage = () => {
-  const [searchParams] = useSearchParams();
+  const { id: appraisalId } = useParams();
   const navigate = useNavigate();
-  const appraisalId = searchParams.get('id');
-  const wpUrl = searchParams.get('wpUrl');
-  const sessionId = searchParams.get('sessionId');
-  const customerEmail = searchParams.get('email');
-  const customerName = searchParams.get('name');
-
-  console.log('Initial params:', { appraisalId, wpUrl, showManualForm: !wpUrl });
+  
+  console.log('Appraisal ID from path:', appraisalId);
 
   const [appraisalData, setAppraisalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showManualForm, setShowManualForm] = useState(!wpUrl);
+  const [showManualForm, setShowManualForm] = useState(false);
   const [success, setSuccess] = useState('');
-
-  // Helper to extract post ID from WordPress URL
-  const extractPostId = (url) => {
-    if (!url) return null;
-    try {
-      const wpUrl = new URL(url);
-      return wpUrl.searchParams.get('post');
-    } catch (e) {
-      console.error('Error parsing WordPress URL:', e);
-      return null;
-    }
-  };
-  
-  // Helper to generate a cleaner URL with fewer query parameters
-  const generateCleanUrl = (id, postId, sessionId) => {
-    const url = new URL(window.location.origin + window.location.pathname);
-    url.searchParams.set('id', id);
-    if (postId) url.searchParams.set('postId', postId);
-    if (sessionId) url.searchParams.set('sessionId', sessionId);
-    return url.toString();
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -62,89 +36,57 @@ const AppraisalPage = () => {
 
     const loadAppraisalDetails = async () => {
       if (!appraisalId) {
-        navigate('/');
+        console.error('No Appraisal ID found in URL path.');
+        setError('Appraisal ID is missing.');
+        setLoading(false);
         return;
       }
       
-      console.log('Loading appraisal details:', { appraisalId, wpUrl, sessionId });
+      console.log('Loading appraisal details for ID:', appraisalId);
       
-      // Clean up the URL if needed (for better bookmarking and sharing)
-      if (wpUrl && sessionId) {
-        const postId = extractPostId(wpUrl);
-        const cleanUrl = generateCleanUrl(appraisalId, postId, sessionId);
-        if (cleanUrl !== window.location.href) {
-          window.history.replaceState({}, '', cleanUrl);
-        }
-      }
-
       try {
         setLoading(true);
         setError(null);
 
-        // First get the basic appraisal data from the spreadsheet, including the WordPress URL
         try {
           const response = await api.get(ENDPOINTS.APPRAISALS.DETAILS_EDIT(appraisalId));
-          console.log('API Response:', response.data);
+          console.log('API Response (Pending):', response.data);
           
           if (mounted && response.data) {
             setAppraisalData(response.data);
-            
-            // If the appraisal has a WordPress URL, use the normal form to complete the appraisal
-            // Otherwise use the manual form to upload images and create a post
             const hasWordPressUrl = response.data.wordpressUrl && response.data.wordpressUrl.trim() !== '';
             setShowManualForm(!hasWordPressUrl);
-            
             console.log('WordPress URL found:', hasWordPressUrl ? response.data.wordpressUrl : 'Not available');
+          } else if (mounted) {
+              throw new Error('No data received for pending appraisal.');
           }
-        } catch (editError) {
-          console.log('Error with DETAILS_EDIT endpoint:', editError.response?.status);
+        } catch (fetchError) {
+          console.log('Error fetching PENDING details:', fetchError.response?.status, fetchError.message);
           
-          // If we get a 404 error, this might be a completed appraisal
-          if (editError.response?.status === 404) {
-            console.log('Appraisal not found in pending sheet, checking if completed...');
-            
-            // Try to check if this is a completed appraisal by making a request to the completed endpoint
+          if (fetchError.response?.status === 404) {
+            console.log('Appraisal not found in pending, checking if completed...');
             try {
               await api.get(ENDPOINTS.APPRAISALS.COMPLETED_DETAILS(appraisalId));
-              console.log('Appraisal found in completed sheet, redirecting to completed-appraisal page');
-              
-              // If successful, redirect to the completed-appraisal page
+              console.log('Appraisal found in completed, redirecting...');
               if (mounted) {
-                navigate(`/completed-appraisal?id=${appraisalId}`, { replace: true });
-                return; // Exit early after redirect
+                navigate(`/appraisals/completed/${appraisalId}`, { replace: true });
+                return;
               }
-            } catch (checkError) {
-              // If this also fails, it's truly not found anywhere
-              console.log('Appraisal not found in completed sheet either:', checkError);
-              throw editError; // Re-throw the original error to continue with error handling
+            } catch (checkCompletedError) {
+              console.log('Appraisal not found in completed either.', checkCompletedError.response?.status);
+              setError(`Appraisal not found (ID: ${appraisalId}).`);
             }
           } else {
-            throw editError; // Re-throw the original error to continue with error handling
+             setError(fetchError.message || `Error fetching appraisal details (ID: ${appraisalId}).`);
+             if (fetchError.response?.status === 401) {
+               navigate('/');
+             }
           }
         }
       } catch (err) {
-        console.log('API Error:', err.response?.status, err.message);
+        console.error('Outer catch block error:', err);
         if (mounted) {
-          const errorMessage = err.response?.status === 500 
-            ? `WordPress data not available. Please enter information manually.` 
-            : err.message || 'Error fetching appraisal details';
-          
-          setError(errorMessage);
-          
-          if (err.response?.status === 401) {
-            navigate('/');
-          } else {
-            console.log('Error - showing manual form');
-            setShowManualForm(true);
-            setAppraisalData({
-              customerEmail: customerEmail || '',
-              customerName: customerName || '',
-              sessionId: sessionId || '',
-              customerDescription: '',
-              iaDescription: '',
-              images: {}
-            });
-          }
+           setError(err.message || 'An unexpected error occurred.');
         }
       } finally {
         if (mounted) {
@@ -158,7 +100,7 @@ const AppraisalPage = () => {
     return () => {
       mounted = false;
     };
-  }, [appraisalId, wpUrl, navigate, customerEmail, customerName, sessionId]);
+  }, [appraisalId, navigate]);
 
   const handleSuccess = () => {
     setSuccess('Appraisal submitted successfully. Redirecting to dashboard...');
@@ -167,33 +109,70 @@ const AppraisalPage = () => {
     }, 3000);
   };
 
-  if (!appraisalId) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+           <LoadingSpinner message="Loading appraisal details..." />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+  
+  if (error && !appraisalData) {
+     return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <BackButton />
+        <main className="container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+           <Alert variant="destructive" className="w-full max-w-lg">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+           </Alert>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!appraisalData) {
+     return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <BackButton />
+        <main className="container mx-auto px-4 py-8 flex-grow flex items-center justify-center">
+           <Alert variant="destructive" className="w-full max-w-lg">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>Could not load appraisal data (ID: {appraisalId}).</AlertDescription>
+           </Alert>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <BackButton />
-
-      <main className="container mx-auto px-4 py-8">
-        {loading && (
-          <LoadingSpinner message="Loading appraisal details..." />
-        )}
-        
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {success && (
-          <Alert className="mb-6 border-green-200 bg-green-50 text-green-700">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>{success}</AlertDescription>
-          </Alert>
-        )}
-
-        {!loading && !error && appraisalData && (
+      <div className="flex-grow">
+        <BackButton />
+        <main className="container mx-auto px-4 py-8">
+          {success && (
+            <Alert className="mb-6 border-green-200 bg-green-50 text-green-700">
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+          
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           <div className="space-y-8">
             <AppraisalDetails appraisalData={appraisalData} />
 
@@ -218,22 +197,15 @@ const AppraisalPage = () => {
 
             <Card>
               <CardContent className="p-6 space-y-4">
-                {console.log('Rendering form section:', { showManualForm, hasAppraisalData: !!appraisalData })}
                 {showManualForm ? (
                   <>
                     <div className="text-center mb-4">
                       <h3 className="text-lg font-semibold mb-2">Appraisal Information</h3>
                       <p className="text-muted-foreground">
                         {appraisalData?.wordpressUrl ? (
-                          <>
-                            Unable to fetch data from WordPress URL: <code className="px-2 py-1 bg-slate-100 rounded">{appraisalData.wordpressUrl}</code>
-                            <br />Please enter the appraisal information manually.
-                          </>
+                          'Unable to fetch data from WordPress URL. Please enter information manually.'
                         ) : (
-                          <>
-                            No WordPress post found for this appraisal.
-                            <br />Please upload images and enter details to create a new appraisal post.
-                          </>
+                          'No WordPress post information available. Please upload images and enter details manually.'
                         )}
                       </p>
                     </div>
@@ -241,8 +213,8 @@ const AppraisalPage = () => {
                       appraisalId={appraisalId}
                       customerData={{
                         email: appraisalData?.customerEmail || '',
-                       name: appraisalData?.customerName || '',
-                       sessionId: appraisalData?.sessionId || ''
+                        name: appraisalData?.customerName || '',
+                        sessionId: appraisalData?.sessionId || '' 
                       }}
                       onSuccess={handleSuccess}
                     />
@@ -256,9 +228,8 @@ const AppraisalPage = () => {
               </CardContent>
             </Card>
           </div>
-        )}
-      </main>
-
+        </main>
+      </div>
       <Footer />
     </div>
   );
