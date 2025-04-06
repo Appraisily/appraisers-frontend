@@ -231,7 +231,12 @@ export const reprocessStep = async (id, stepName) => {
     return response.data;
   } catch (error) {
     console.error('Error reprocessing step:', error);
-    throw new Error(error.message || 'Failed to reprocess step');
+    // Extract detailed message from backend response if available
+    const message = 
+      error.response?.data?.message ||  // Check backend response data first
+      error.message ||                   // Fallback to Axios error message
+      'Failed to reprocess step';        // Final fallback
+    throw new Error(message);
   }
 };
 
