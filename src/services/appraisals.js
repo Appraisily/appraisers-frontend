@@ -257,7 +257,8 @@ export const getBySessionId = async (sessionId) => {
 export const reprocessCompletedAppraisal = async (id) => {
   try {
     console.log(`Initiating complete reprocessing for appraisal ${id}`);
-    const response = await api.post(`${API_BASE_URL}/api/appraisals/${id}/reprocess-completed`, {
+    // Use the defined endpoint
+    const response = await api.post(ENDPOINTS.APPRAISALS.REPROCESS_COMPLETED(id), {
       reprocessStatistics: true,
       regeneratePdf: true
     });

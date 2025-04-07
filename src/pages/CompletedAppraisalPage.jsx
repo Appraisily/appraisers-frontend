@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { RefreshCw } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BackButton from '../components/BackButton';
@@ -45,6 +46,7 @@ const CompletedAppraisalPage = () => {
     try {
       setLoading(true);
       setError(null);
+      setSuccessMessage(null);
       
       const data = await appraisalService.getCompletedAppraisalDetails(appraisalId);
       console.log('Completed appraisal data:', data);
@@ -56,6 +58,7 @@ const CompletedAppraisalPage = () => {
          setError(`Completed appraisal not found (ID: ${appraisalId}). It might still be pending or does not exist.`);
       } else if (error.response?.status === 401) {
         setError('Unauthorized access.');
+        navigate('/');
       } else {
         setError(error.message || 'Failed to load completed appraisal details');
       }
@@ -66,7 +69,7 @@ const CompletedAppraisalPage = () => {
   };
 
   const handleProcessingComplete = (message) => {
-    setSuccessMessage(message);
+    setSuccessMessage(message || 'Step processing completed successfully.');
     loadAppraisalDetails();
     setTimeout(() => {
       setSuccessMessage(null);
@@ -84,7 +87,7 @@ const CompletedAppraisalPage = () => {
       const response = await appraisalService.reprocessCompletedAppraisal(appraisalId);
       
       if (response.success) {
-        setSuccessMessage('Appraisal reprocessing initiated. This may take a few minutes to complete.');
+        setSuccessMessage('Appraisal reprocessing initiated. This may take a few minutes. Refreshing details...');
         setTimeout(() => {
           loadAppraisalDetails();
         }, 3000);
@@ -94,8 +97,6 @@ const CompletedAppraisalPage = () => {
     } catch (error) {
       console.error('Error reprocessing completed appraisal:', error);
       setError(error.message || 'Failed to reprocess appraisal. Please try again.');
-    } finally {
-      setIsReprocessing(false);
     }
   };
 
@@ -135,7 +136,7 @@ const CompletedAppraisalPage = () => {
           <BackButton /> 
           <Alert className="mt-6">
             <AlertTitle>Appraisal Not Found</AlertTitle>
-            <AlertDescription>Could not find data for appraisal ID: {appraisalId}</AlertDescription>
+            <AlertDescription>Could not find data for appraisal ID: {appraisalId}. It may have been deleted or the ID is incorrect.</AlertDescription>
           </Alert>
         </main>
         <Footer />
@@ -147,25 +148,31 @@ const CompletedAppraisalPage = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6">
-        <BackButton />
-        
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center my-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold">Completed Appraisal Tools</h1>
-          <Button 
-            onClick={handleReprocessCompletedAppraisal} 
-            disabled={isReprocessing}
-            variant="default"
-            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-          >
-            {isReprocessing ? (
-              <>
-                <LoadingSpinner size="sm" className="mr-2" />
-                <span>Reprocessing...</span>
-              </>
-            ) : (
-              "Completely Reprocess Appraisal"
-            )}
-          </Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className="flex items-center gap-4">
+             <BackButton />
+             <h1 className="text-2xl font-semibold tracking-tight">
+               {appraisal.title || appraisal.identifier || `Appraisal ${appraisalId}`}
+             </h1>
+           </div>
+           <Button 
+             onClick={handleReprocessCompletedAppraisal} 
+             disabled={isReprocessing}
+             variant="outline"
+             className="w-full sm:w-auto"
+           >
+             {isReprocessing ? (
+               <>
+                 <LoadingSpinner size="sm" className="mr-2" /> 
+                 <span>Reprocessing...</span>
+               </>
+             ) : (
+               <>
+                 <RefreshCw className="mr-2 h-4 w-4" /> 
+                 <span>Reprocess</span>
+               </>
+             )}
+           </Button>
         </div>
         
         {successMessage && (
@@ -181,24 +188,29 @@ const CompletedAppraisalPage = () => {
             </Alert>
           )}
         
-        <Tabs defaultValue="details" className="mb-6">
-          <TabsList className="flex flex-wrap h-auto justify-start">
-            <TabsTrigger value="details">Appraisal Details</TabsTrigger>
-            <TabsTrigger value="processing">Step-by-Step Processing</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="details" className="mt-6">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Appraisal Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
             <AppraisalDetails appraisalData={appraisal} />
-          </TabsContent>
-          
-          <TabsContent value="processing" className="mt-6">
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Processing Status</CardTitle>
+          </CardHeader>
+          <CardContent>
             <StepProcessingPanel 
               appraisalId={appraisalId} 
-              appraisalType={appraisal.type || appraisal.metadata?.object_type} 
+              appraisalType={appraisal?.type || appraisal?.metadata?.object_type || 'Unknown'} 
+              appraisal={appraisal}
               onComplete={handleProcessingComplete} 
             />
-          </TabsContent>
-        </Tabs>
+          </CardContent>
+        </Card>
+
       </main>
       <Footer />
     </div>

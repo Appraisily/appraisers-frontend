@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { 
-  ExternalLink, Mail, User, Database, Image, Calendar, Clock, Hash, 
+  ExternalLink, Mail, User, Database, Image as ImageIcon, Calendar, Clock, Hash, 
   FileText, Info, BarChart, Palette, Gallery, Maximize, Check, X, AlertTriangle,
   Tag, Award, Star, ChevronDown, ChevronUp, DollarSign, Percent, PieChart,
-  LineChart, AlignLeft, Newspaper, ArrowUpRight, Search
+  LineChart, AlignLeft, Newspaper, ArrowUpRight, Search, LinkIcon
 } from "lucide-react";
 
 // Import the new sub-components
@@ -17,6 +18,46 @@ import StatisticsCard from './details/StatisticsCard';
 import DescriptionsCard from './details/DescriptionsCard';
 import ProcessingStatusCard from './details/ProcessingStatusCard';
 import WordPressCard from './details/WordPressCard';
+
+// --- Helper Components ---
+const DetailItem = ({ label, value, icon: Icon, isLink = false, linkHref = '#' }) => {
+  if (!value && value !== 0 && value !== false) return null; // Don't render if no value (except 0 or false)
+
+  const content = isLink ? (
+    <a
+      href={linkHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline"
+    >
+      {value}
+      <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+    </a>
+  ) : (
+    value
+  );
+
+  return (
+    <div className="grid grid-cols-3 gap-2 py-2 items-start">
+      <dt className="text-sm font-medium text-muted-foreground flex items-center col-span-1">
+        {Icon && <Icon className="mr-2 h-4 w-4 text-gray-500" />}
+        {label}
+      </dt>
+      <dd className="text-sm text-foreground col-span-2">{content}</dd>
+    </div>
+  );
+};
+
+const DescriptionSection = ({ title, text }) => {
+  if (!text || text.trim() === '') return null;
+  return (
+    <div className="mb-4">
+      <h4 className="text-sm font-semibold mb-1">{title}</h4>
+      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{text}</p>
+    </div>
+  );
+};
+// --- End Helper Components ---
 
 const AppraisalDetails = ({ appraisalData }) => {
   const [expandedMetadata, setExpandedMetadata] = useState(false);
