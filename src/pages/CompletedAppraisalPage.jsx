@@ -84,19 +84,31 @@ const CompletedAppraisalPage = () => {
       setSuccessMessage(null);
       
       console.log(`Initiating complete reprocessing for appraisal ${appraisalId}`);
-      const response = await appraisalService.reprocessCompletedAppraisal(appraisalId);
-      
-      if (response.success) {
-        setSuccessMessage('Appraisal reprocessing initiated. This may take a few minutes. Refreshing details...');
-        setTimeout(() => {
-          loadAppraisalDetails();
-        }, 3000);
-      } else {
-        setError(response.message || 'Failed to initiate reprocessing');
+      // Add additional logging to help diagnose issues
+      try {
+        const response = await appraisalService.reprocessCompletedAppraisal(appraisalId);
+        
+        if (response && response.success) {
+          setSuccessMessage('Appraisal reprocessing initiated. This may take a few minutes. Refreshing details...');
+          setTimeout(() => {
+            loadAppraisalDetails();
+          }, 3000);
+        } else {
+          setError((response && response.message) || 'Failed to initiate reprocessing');
+        }
+      } catch (apiError) {
+        console.error('API call error:', apiError);
+        if (apiError.message && apiError.message.includes('API_BASE_URL')) {
+          setError('Configuration error: Backend URL not properly configured. Please contact support.');
+        } else {
+          throw apiError; // Re-throw to be caught by outer catch
+        }
       }
     } catch (error) {
       console.error('Error reprocessing completed appraisal:', error);
       setError(error.message || 'Failed to reprocess appraisal. Please try again.');
+    } finally {
+      setIsReprocessing(false);
     }
   };
 

@@ -257,14 +257,25 @@ export const getBySessionId = async (sessionId) => {
 export const reprocessCompletedAppraisal = async (id) => {
   try {
     console.log(`Initiating complete reprocessing for appraisal ${id}`);
-    // Use the defined endpoint
-    const response = await api.post(ENDPOINTS.APPRAISALS.REPROCESS_COMPLETED(id), {
+    
+    // Check if the backend URL is properly configured
+    if (!import.meta.env.VITE_BACKEND_URL) {
+      console.error('VITE_BACKEND_URL environment variable is not defined. This is required for API calls.');
+      throw new Error('Backend URL configuration error (VITE_BACKEND_URL is not defined). Please check your environment variables.');
+    }
+    
+    // Use the defined endpoint from the ENDPOINTS configuration
+    // This will properly use the environment variable import.meta.env.VITE_BACKEND_URL
+    const endpoint = ENDPOINTS.APPRAISALS.REPROCESS_COMPLETED(id);
+    console.log('Using endpoint for reprocessing:', endpoint);
+    
+    const response = await api.post(endpoint, {
       reprocessStatistics: true,
       regeneratePdf: true
     });
     return response.data;
   } catch (error) {
     console.error('Error reprocessing completed appraisal:', error);
-    throw new Error(error.message || 'Failed to reprocess completed appraisal');
+    throw error;
   }
 };

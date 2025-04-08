@@ -196,12 +196,24 @@ Response:
 
 ### Environment Variables
 
-Create a `.env` file with the following variables:
+Create a `.env` file in the project root with the following variables:
 
 ```env
-VITE_BACKEND_URL=https://appraisers-backend-url
+# Required - URL of the backend API
+VITE_BACKEND_URL=https://appraisers-backend-856401495068.us-central1.run.app
+# Optional - Google client ID for authentication
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
+# Environment name
+VITE_APP_ENV=development
 ```
+
+#### Netlify Deployment
+
+When deploying to Netlify, set these environment variables in the Netlify UI under:
+1. Site settings > Build & deploy > Environment
+2. Add the variables with the same names as above
+
+Important: Do not commit the `.env` file to the repository. It's already in `.gitignore` to prevent this.
 
 ## UI Components
 
