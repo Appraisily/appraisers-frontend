@@ -203,28 +203,6 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
         </p>
       </div>
       
-      {/* Direct Step Buttons */}
-      <div className="flex flex-wrap gap-2">
-        {appraisalSteps.map(step => (
-          <Button 
-            key={step.id}
-            onClick={() => handleReprocessStep(step.id)}
-            variant="outline"
-            size="sm"
-            disabled={isProcessing}
-            className={`flex items-center ${activeStepId === step.id ? 'ring-2 ring-primary' : ''}`}
-            title={step.description} // Tooltip
-          >
-            {activeStepId === step.id ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <StepIcon status={step.status} />
-            )}
-            <span className="ml-2">{step.name}</span>
-          </Button>
-        ))}
-      </div>
-      
       {/* Complete Reprocessing Option */}
       <Button 
         onClick={handleReprocessComplete} 

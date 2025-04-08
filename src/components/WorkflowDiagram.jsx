@@ -41,7 +41,7 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
   };
 
   return (
-    <div className="workflow-diagram p-4 bg-white rounded-lg shadow-sm">
+    <div className="workflow-diagram rounded-lg shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center justify-center gap-2">
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>
@@ -84,8 +84,9 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
       <style jsx>{`
         /* Additional styling for the workflow diagram */
         .workflow-diagram {
-          overflow-x: auto;
           width: 100%;
+          background-color: white;
+          padding: 1rem;
         }
         
         @media (max-width: 768px) {
