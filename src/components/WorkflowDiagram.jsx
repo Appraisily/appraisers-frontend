@@ -41,14 +41,14 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
   };
 
   return (
-    <div className="workflow-diagram rounded-lg shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center justify-center gap-2">
+    <div className="workflow-diagram rounded-lg shadow-sm w-full">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 w-full">
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>
             {/* Step node */}
             <div 
               className={`flex flex-col items-center p-3 border rounded-md cursor-pointer transition-colors 
-                ${getStatusColor(step.status)} hover:shadow-md`}
+                ${getStatusColor(step.status)} hover:shadow-md flex-1 min-w-[120px]`}
               onClick={() => onStepClick?.(step.id)}
               onMouseEnter={() => onStepHover?.(step)}
               onMouseLeave={() => onStepHover?.(null)}
@@ -62,7 +62,7 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
             
             {/* Arrow connector */}
             {index < steps.length - 1 && (
-              <div className="hidden md:flex items-center justify-center w-6">
+              <div className="hidden md:flex items-center justify-center w-6 flex-shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -91,7 +91,7 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
         
         @media (max-width: 768px) {
           .workflow-diagram > div {
-            width: fit-content;
+            width: 100%;
             margin: 0 auto;
           }
         }

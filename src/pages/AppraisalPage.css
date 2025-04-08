@@ -78,7 +78,34 @@
 
 /* Processing tab optimizations */
 .processing-tab-active {
-  border-bottom: 2px solid #3b82f6;
+  border-bottom: 3px solid #3b82f6;
+  font-weight: 600;
+}
+
+/* TabsList wrapper styling */
+[role="tabslist"] {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* TabsTrigger styling */
+[role="tab"] {
+  flex: 1;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+[role="tab"]:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+[role="tab"][data-state="active"] {
+  background-color: rgba(59, 130, 246, 0.05);
+  font-weight: 600;
 }
 
 /* Compact layout */
@@ -89,6 +116,7 @@
 
 .compact-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .compact-details {
@@ -120,4 +148,28 @@
 
 .step-description-list li {
   margin-bottom: 0.25rem;
+}
+
+/* Main content area with full width */
+.main-content-full {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+}
+
+/* Reprocess button styling */
+.reprocess-button {
+  background-color: #111827;
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.reprocess-button:hover {
+  background-color: #1f2937;
+}
+
+.reprocess-button:disabled {
+  background-color: #6b7280;
+  cursor: not-allowed;
 }

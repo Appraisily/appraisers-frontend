@@ -263,17 +263,17 @@ const AppraisalDetails = ({ appraisalData }) => {
         </div>
       )}
       
-      <Tabs defaultValue="basic" className="mb-6">
-        <TabsList className="flex flex-wrap h-auto justify-start">
-          <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="artwork">Artwork Details</TabsTrigger>
-          <TabsTrigger value="statistics">Statistics {hasStatistics && '✓'}</TabsTrigger>
-          <TabsTrigger value="descriptions">Descriptions</TabsTrigger>
-          <TabsTrigger value="processing">Processing Status</TabsTrigger>
-          <TabsTrigger value="wordpress">WordPress {hasWordPressError ? '⚠️' : ''}</TabsTrigger>
+      <Tabs defaultValue="basic" className="mb-6 w-full">
+        <TabsList className="w-full h-auto justify-start">
+          <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
+          <TabsTrigger value="artwork" className="flex-1">Artwork Details</TabsTrigger>
+          <TabsTrigger value="statistics" className="flex-1">Statistics {hasStatistics && '✓'}</TabsTrigger>
+          <TabsTrigger value="descriptions" className="flex-1">Descriptions</TabsTrigger>
+          <TabsTrigger value="processing" className="flex-1">Processing Status</TabsTrigger>
+          <TabsTrigger value="wordpress" className="flex-1">WordPress {hasWordPressError ? '⚠️' : ''}</TabsTrigger>
         </TabsList>
       
-        <TabsContent value="basic">
+        <TabsContent value="basic" className="w-full">
           <BasicInfoCard 
             basicInfo={basicInfo} 
             links={links} 
@@ -281,7 +281,7 @@ const AppraisalDetails = ({ appraisalData }) => {
           />
         </TabsContent>
         
-        <TabsContent value="artwork">
+        <TabsContent value="artwork" className="w-full">
           <ArtworkDetailsCard 
             artworkDetails={artworkDetails} 
             rawMetadata={rawMetadata} 
@@ -290,7 +290,7 @@ const AppraisalDetails = ({ appraisalData }) => {
           />
         </TabsContent>
         
-        <TabsContent value="statistics">
+        <TabsContent value="statistics" className="w-full">
           <StatisticsCard 
             statistics={statistics} 
             appraisalData={appraisalData} 
@@ -306,11 +306,11 @@ const AppraisalDetails = ({ appraisalData }) => {
           />
         </TabsContent>
         
-        <TabsContent value="descriptions">
+        <TabsContent value="descriptions" className="w-full">
           <DescriptionsCard enhancedDescription={enhancedDescription} />
         </TabsContent>
         
-        <TabsContent value="wordpress">
+        <TabsContent value="wordpress" className="w-full">
           <WordPressCard 
             hasWordPressError={hasWordPressError}
             wordPressErrorMessage={wordPressErrorMessage}
@@ -323,7 +323,7 @@ const AppraisalDetails = ({ appraisalData }) => {
           />
         </TabsContent>
         
-        <TabsContent value="processing">
+        <TabsContent value="processing" className="w-full">
           <ProcessingStatusCard 
             processingInfo={processingInfo} 
             renderBoolean={renderBoolean} 
