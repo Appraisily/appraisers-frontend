@@ -163,7 +163,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {processingError && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
@@ -183,8 +183,8 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       )}
       
       {/* Workflow Diagram */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="w-full">
+        <CardContent className="pt-6 w-full">
           <WorkflowDiagram
             steps={appraisalSteps}
             onStepClick={handleReprocessStep}
@@ -194,7 +194,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       </Card>
       
       {/* Step Information Panel */}
-      <div className="p-4 bg-muted rounded-md min-h-[80px]">
+      <div className="p-4 bg-muted rounded-md min-h-[80px] w-full">
         <h4 className="text-sm font-medium mb-1">
           {selectedStep ? selectedStep.name : "Hover over any step for details"}
         </h4>
@@ -208,6 +208,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
         onClick={handleReprocessComplete} 
         disabled={isProcessing}
         className="w-full mt-4"
+        size="lg"
       >
         {isProcessing && !activeStepId ? (
           <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reprocessing...</>
