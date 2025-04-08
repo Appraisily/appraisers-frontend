@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RefreshCw } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BackButton from '../components/BackButton';
 import LoadingSpinner from '../components/LoadingSpinner';
-import StepProcessingPanel from '../components/StepProcessingPanel';
+import AppraisalProcessingPanel from '../components/AppraisalProcessingPanel';
 import AppraisalDetails from '../components/AppraisalDetails';
 import * as appraisalService from '../services/appraisals';
 import { checkAuth } from '../services/auth';
@@ -23,6 +24,7 @@ const CompletedAppraisalPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isReprocessing, setIsReprocessing] = useState(false);
+  const [activeTab, setActiveTab] = useState("processing");
 
   useEffect(() => {
     if (!checkAuth()) {
@@ -159,11 +161,11 @@ const CompletedAppraisalPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div className="flex items-center gap-4">
+      <main className="flex-grow container mx-auto px-4 py-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+          <div className="flex items-center gap-3">
              <BackButton />
-             <h1 className="text-2xl font-semibold tracking-tight">
+             <h1 className="text-xl font-semibold tracking-tight compact-details">
                {appraisal.title || appraisal.identifier || `Appraisal ${appraisalId}`}
              </h1>
            </div>
@@ -171,7 +173,8 @@ const CompletedAppraisalPage = () => {
              onClick={handleReprocessCompletedAppraisal} 
              disabled={isReprocessing}
              variant="outline"
-             className="w-full sm:w-auto"
+             className="w-full sm:w-auto compact-details"
+             size="sm"
            >
              {isReprocessing ? (
                <>
@@ -181,48 +184,54 @@ const CompletedAppraisalPage = () => {
              ) : (
                <>
                  <RefreshCw className="mr-2 h-4 w-4" /> 
-                 <span>Reprocess</span>
+                 <span>Reprocess Full Appraisal</span>
                </>
              )}
            </Button>
         </div>
         
         {successMessage && (
-          <Alert className="mb-6 border-green-200 bg-green-50 text-green-700">
+          <Alert className="mb-3 border-green-200 bg-green-50 text-green-700">
             <AlertTitle>Success</AlertTitle>
             <AlertDescription>{successMessage}</AlertDescription>
           </Alert>
         )}
-         {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+        {error && (
+          <Alert variant="destructive" className="mb-3">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Appraisal Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AppraisalDetails appraisalData={appraisal} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Processing Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StepProcessingPanel 
-              appraisalId={appraisalId} 
-              appraisalType={appraisal?.type || appraisal?.metadata?.object_type || 'Unknown'} 
+        <Tabs defaultValue="processing" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-3">
+            <TabsTrigger value="processing" className={activeTab === "processing" ? "processing-tab-active" : ""}>
+              Step-by-Step Processing
+            </TabsTrigger>
+            <TabsTrigger value="details" className={activeTab === "details" ? "processing-tab-active" : ""}>
+              Appraisal Details
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="processing" className="space-y-0">
+            <AppraisalProcessingPanel 
+              appraisalId={appraisalId}
               appraisal={appraisal}
               onComplete={handleProcessingComplete} 
             />
-          </CardContent>
-        </Card>
-
+          </TabsContent>
+          
+          <TabsContent value="details">
+            <Card className="compact-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Appraisal Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AppraisalDetails appraisalData={appraisal} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
       <Footer />
     </div>

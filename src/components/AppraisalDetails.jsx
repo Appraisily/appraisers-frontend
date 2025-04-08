@@ -4,9 +4,10 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   ExternalLink, Mail, User, Database, Image as ImageIcon, Calendar, Clock, Hash, 
-  FileText, Info, BarChart, Palette, Gallery, Maximize, Check, X, AlertTriangle,
+  FileText, Info, BarChart, Palette, Maximize, Check, X, AlertTriangle,
   Tag, Award, Star, ChevronDown, ChevronUp, DollarSign, Percent, PieChart,
   LineChart, AlignLeft, Newspaper, ArrowUpRight, Search, LinkIcon
 } from "lucide-react";

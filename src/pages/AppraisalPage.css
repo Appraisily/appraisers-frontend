@@ -61,3 +61,63 @@
   border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
+
+/* New styles for optimized processing interface */
+.step-status-item {
+  transition: all 0.2s ease;
+}
+
+.step-status-item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.selected-step {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid #3b82f6;
+}
+
+/* Processing tab optimizations */
+.processing-tab-active {
+  border-bottom: 2px solid #3b82f6;
+}
+
+/* Compact layout */
+.compact-layout {
+  margin: 0;
+  padding: 0;
+}
+
+.compact-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.compact-details {
+  font-size: 0.9rem;
+}
+
+/* Step indicators with clickable cursors */
+.clickable-step {
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.clickable-step:hover {
+  background-color: rgba(243, 244, 246, 1);
+}
+
+/* Active step highlight */
+.active-step {
+  background-color: rgba(243, 244, 246, 0.8);
+  border-left: 3px solid #3b82f6;
+}
+
+/* Description list for step explanations */
+.step-description-list {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.step-description-list li {
+  margin-bottom: 0.25rem;
+}

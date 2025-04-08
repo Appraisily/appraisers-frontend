@@ -133,3 +133,69 @@
     @apply outline-none ring-2 ring-ring ring-offset-2;
   }
 }
+
+/* Mermaid Diagram Styling */
+.mermaid-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.mermaid {
+  font-family: 'Inter', sans-serif;
+}
+
+.status-completed rect {
+  fill: #dcfce7 !important;
+  stroke: #22c55e !important;
+}
+
+.status-failed rect {
+  fill: #fee2e2 !important;
+  stroke: #ef4444 !important;
+}
+
+.status-processing rect {
+  fill: #dbeafe !important;
+  stroke: #3b82f6 !important;
+}
+
+.node:hover rect {
+  stroke-width: 2px !important;
+  filter: brightness(0.95);
+}
+
+/* Step Button Styling */
+.step-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.step-button:hover {
+  background-color: #f9fafb;
+}
+
+.step-button.active {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.step-button-icon {
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.step-info-panel {
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  min-height: 5rem;
+}
