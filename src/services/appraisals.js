@@ -264,14 +264,17 @@ export const reprocessCompletedAppraisal = async (id) => {
       throw new Error('Backend URL configuration error (VITE_BACKEND_URL is not defined). Please check your environment variables.');
     }
     
-    // Use the defined endpoint from the ENDPOINTS configuration
-    // This will properly use the environment variable import.meta.env.VITE_BACKEND_URL
-    const endpoint = ENDPOINTS.APPRAISALS.REPROCESS_COMPLETED(id);
+    // Use the process-from-step endpoint instead of reprocess-completed
+    const endpoint = ENDPOINTS.APPRAISALS.PROCESS_FROM_STEP(id);
     console.log('Using endpoint for reprocessing:', endpoint);
     
+    // Use the first step in the processing flow to restart the entire process
     const response = await api.post(endpoint, {
-      reprocessStatistics: true,
-      regeneratePdf: true
+      startStep: 'STEP_SET_VALUE', // Using the correct step name format from backend
+      options: {
+        reprocessStatistics: true,
+        regeneratePdf: true
+      }
     });
     return response.data;
   } catch (error) {

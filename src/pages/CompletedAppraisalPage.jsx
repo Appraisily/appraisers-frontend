@@ -4,10 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowLeft } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import BackButton from '../components/BackButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AppraisalProcessingPanel from '../components/AppraisalProcessingPanel';
 import AppraisalDetails from '../components/AppraisalDetails';
@@ -114,6 +113,10 @@ const CompletedAppraisalPage = () => {
     }
   };
 
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -131,7 +134,16 @@ const CompletedAppraisalPage = () => {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6">
-          <BackButton /> 
+          <div className="flex justify-end mb-4">
+            <Button 
+              onClick={handleBackToDashboard} 
+              variant="outline" 
+              size="sm"
+              className="text-sm"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+            </Button>
+          </div>
           <Alert variant="destructive" className="mt-6">
             <AlertTitle>Error Loading Appraisal</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
@@ -147,7 +159,16 @@ const CompletedAppraisalPage = () => {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-6">
-          <BackButton /> 
+          <div className="flex justify-end mb-4">
+            <Button 
+              onClick={handleBackToDashboard} 
+              variant="outline" 
+              size="sm"
+              className="text-sm"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+            </Button>
+          </div>
           <Alert className="mt-6">
             <AlertTitle>Appraisal Not Found</AlertTitle>
             <AlertDescription>Could not find data for appraisal ID: {appraisalId}. It may have been deleted or the ID is incorrect.</AlertDescription>
@@ -158,36 +179,28 @@ const CompletedAppraisalPage = () => {
     );
   }
 
+  // Fix encoding issues in title if present
+  const appraisalTitle = (appraisal.title || appraisal.identifier || `Appraisal ${appraisalId}`)
+    .replace(/&#215;/g, "×")
+    .replace(/&#217;/g, "'")
+    .replace(/&amp;/g, "&");
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
-          <div className="flex items-center gap-3">
-             <BackButton />
-             <h1 className="text-xl font-semibold tracking-tight compact-details">
-               {appraisal.title || appraisal.identifier || `Appraisal ${appraisalId}`}
-             </h1>
-           </div>
-           <Button 
-             onClick={handleReprocessCompletedAppraisal} 
-             disabled={isReprocessing}
-             variant="outline"
-             className="w-full sm:w-auto compact-details"
-             size="sm"
-           >
-             {isReprocessing ? (
-               <>
-                 <LoadingSpinner size="sm" className="mr-2" /> 
-                 <span>Reprocessing...</span>
-               </>
-             ) : (
-               <>
-                 <RefreshCw className="mr-2 h-4 w-4" /> 
-                 <span>Reprocess Full Appraisal</span>
-               </>
-             )}
-           </Button>
+        <div className="flex flex-row justify-between items-center mb-3">
+          <h1 className="text-xl font-semibold tracking-tight">
+            {appraisalTitle}
+          </h1>
+          <Button 
+            onClick={handleBackToDashboard} 
+            variant="outline" 
+            size="sm"
+            className="text-sm"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+          </Button>
         </div>
         
         {successMessage && (
@@ -204,11 +217,11 @@ const CompletedAppraisalPage = () => {
         )}
         
         <Tabs defaultValue="processing" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-3">
-            <TabsTrigger value="processing" className={activeTab === "processing" ? "processing-tab-active" : ""}>
+          <TabsList className="mb-3 w-full justify-start">
+            <TabsTrigger value="processing" className={`flex-1 ${activeTab === "processing" ? "processing-tab-active" : ""}`}>
               Step-by-Step Processing
             </TabsTrigger>
-            <TabsTrigger value="details" className={activeTab === "details" ? "processing-tab-active" : ""}>
+            <TabsTrigger value="details" className={`flex-1 ${activeTab === "details" ? "processing-tab-active" : ""}`}>
               Appraisal Details
             </TabsTrigger>
           </TabsList>
