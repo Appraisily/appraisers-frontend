@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import MermaidDiagram from './MermaidDiagram';
+import WorkflowDiagram from './WorkflowDiagram';
 import * as appraisalService from '../services/appraisals';
 
 // Helper to format step names for display
@@ -31,7 +31,7 @@ const StepIcon = ({ status }) => {
 /**
  * AppraisalProcessingPanel Component
  * 
- * Displays the appraisal processing status with a Mermaid diagram 
+ * Displays the appraisal processing status with a visual workflow diagram
  * and provides direct-access buttons for reprocessing steps
  */
 const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
@@ -94,25 +94,6 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
     const step = appraisal.steps.find(s => s.name === stepId);
     return step ? step.status : 'pending';
   }
-  
-  // Mermaid diagram configuration
-  const mermaidConfig = `
-    graph TD
-      A[Data Collection] --> B[Metadata Extraction]
-      B --> C[AI Analysis]
-      C --> D[Value Assessment]
-      D --> E[Statistics Generation]
-      E --> F[HTML Visualization]
-      F --> G[PDF Generation]
-      
-      style A fill:#f5f5f5,stroke:#333
-      style B fill:#f5f5f5,stroke:#333
-      style C fill:#f5f5f5,stroke:#333
-      style D fill:#f5f5f5,stroke:#333
-      style E fill:#f5f5f5,stroke:#333
-      style F fill:#f5f5f5,stroke:#333
-      style G fill:#f5f5f5,stroke:#333
-  `;
   
   // Handle reprocessing a specific step
   const handleReprocessStep = async (stepId) => {
@@ -201,12 +182,10 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
         </Alert>
       )}
       
-      {/* Mermaid Diagram */}
+      {/* Workflow Diagram */}
       <Card>
         <CardContent className="pt-6">
-          <MermaidDiagram
-            config={mermaidConfig}
-            appraisal={appraisal}
+          <WorkflowDiagram
             steps={appraisalSteps}
             onStepClick={handleReprocessStep}
             onStepHover={setSelectedStep}
