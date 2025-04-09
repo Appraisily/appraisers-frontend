@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Loader2, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, RefreshCw, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import WorkflowDiagram from './WorkflowDiagram';
 import * as appraisalService from '../services/appraisals';
+import { Badge } from "@/components/ui/badge";
 
 // Helper to format step names for display
 const formatStepName = (name) => {
@@ -40,6 +41,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
   const [activeStepId, setActiveStepId] = useState(null);
   const [processingError, setProcessingError] = useState(null);
   const [processingResult, setProcessingResult] = useState(null);
+  const [pendingSteps, setPendingSteps] = useState([]);
   
   // Define all possible appraisal processing steps
   const appraisalSteps = [
@@ -92,6 +94,12 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
     if (!appraisal || !appraisal.steps) return 'pending';
     
     const step = appraisal.steps.find(s => s.name === stepId);
+    
+    // If the step is in our pendingSteps array, it's being processed
+    if (pendingSteps.includes(stepId)) {
+      return 'processing';
+    }
+    
     return step ? step.status : 'pending';
   }
   
@@ -100,31 +108,50 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
     if (!stepId || !appraisalId || isProcessing) return;
     
     try {
+      // Set the step as actively being processed
       setActiveStepId(stepId);
       setIsProcessing(true);
       setProcessingError(null);
-      setProcessingResult(null);
+      
+      // Add this step to pendingSteps
+      setPendingSteps(prev => [...prev, stepId]);
+      
+      // Show immediate feedback to the user
+      setProcessingResult({
+        success: true,
+        message: `Processing started: ${formatStepName(stepId)}. This will continue in the background.`,
+        isTemporary: true
+      });
       
       console.log(`Reprocessing step ${stepId} for appraisal ${appraisalId}`);
       
-      const response = await appraisalService.reprocessStep(appraisalId, stepId);
+      // Call API in the background
+      appraisalService.reprocessStep(appraisalId, stepId)
+        .then(response => {
+          // On success, show a toast notification if available
+          if (onComplete) {
+            onComplete(`Step '${formatStepName(stepId)}' reprocessing initiated. Refreshing will show updated status.`);
+          }
+        })
+        .catch(error => {
+          console.error('Error reprocessing step:', error);
+          // Show error in UI
+          setProcessingError(`Failed to reprocess step: ${formatStepName(stepId)}. ${error.message}`);
+          // Remove from pending steps
+          setPendingSteps(prev => prev.filter(s => s !== stepId));
+        });
       
-      setProcessingResult({
-        success: response.success,
-        message: response.message || `Successfully reprocessed step: ${formatStepName(stepId)}`,
-        result: response.result
-      });
-      
-      // Notify parent component to reload data
-      if (response.success && onComplete) {
-        onComplete(`Step '${formatStepName(stepId)}' reprocessed. Refreshing details...`);
-      }
-    } catch (error) {
-      console.error('Error reprocessing step:', error);
-      setProcessingError(error.message || `Failed to reprocess step: ${formatStepName(stepId)}. Please try again.`);
     } finally {
+      // Reset active processing state but keep the step in pendingSteps
       setIsProcessing(false);
       setActiveStepId(null);
+      
+      // Clear the temporary success message after a few seconds
+      if (processingResult?.isTemporary) {
+        setTimeout(() => {
+          setProcessingResult(null);
+        }, 5000);
+      }
     }
   };
   
@@ -135,30 +162,37 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
     try {
       setIsProcessing(true);
       setProcessingError(null);
-      setProcessingResult(null);
+      
+      // Show immediate feedback
+      setProcessingResult({
+        success: true,
+        message: 'Complete appraisal reprocessing initiated. This will continue in the background.',
+        isTemporary: true
+      });
       
       console.log(`Initiating complete reprocessing for appraisal ${appraisalId}`);
       
-      const response = await appraisalService.reprocessCompletedAppraisal(appraisalId);
-      
-      if (response && response.success) {
-        setProcessingResult({
-          success: true,
-          message: 'Complete appraisal reprocessing initiated. This may take a few minutes.',
-          result: response.result
+      // Start reprocessing in the background
+      appraisalService.reprocessCompletedAppraisal(appraisalId)
+        .then(response => {
+          if (onComplete) {
+            onComplete('Complete appraisal reprocessing initiated. Refreshing will show updated status.');
+          }
+        })
+        .catch(error => {
+          console.error('Error reprocessing completed appraisal:', error);
+          setProcessingError(error.message || 'Failed to reprocess appraisal. Please try again.');
         });
-        
-        if (onComplete) {
-          onComplete('Complete appraisal reprocessing initiated. Refreshing details...');
-        }
-      } else {
-        throw new Error((response && response.message) || 'Failed to initiate reprocessing');
-      }
-    } catch (error) {
-      console.error('Error reprocessing completed appraisal:', error);
-      setProcessingError(error.message || 'Failed to reprocess appraisal. Please try again.');
+      
     } finally {
       setIsProcessing(false);
+      
+      // Clear the temporary success message after a few seconds
+      if (processingResult?.isTemporary) {
+        setTimeout(() => {
+          setProcessingResult(null);
+        }, 5000);
+      }
     }
   };
   
@@ -175,11 +209,28 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       {processingResult && (
         <Alert 
           variant={processingResult.success ? "default" : "destructive"} 
-          className="bg-opacity-80"
+          className={`bg-opacity-80 ${processingResult.isTemporary ? "border-blue-400 bg-blue-50" : ""}`}
         >
-          <AlertTitle>{processingResult.success ? "Processing Success" : "Processing Failed"}</AlertTitle>
+          <Info className="h-4 w-4" />
+          <AlertTitle>{processingResult.success ? "Processing Status" : "Processing Failed"}</AlertTitle>
           <AlertDescription>{processingResult.message}</AlertDescription>
         </Alert>
+      )}
+      
+      {/* Pending Steps Indicator */}
+      {pendingSteps.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          <span className="text-sm font-medium text-muted-foreground">Processing in background: </span>
+          {pendingSteps.map(stepId => {
+            const step = appraisalSteps.find(s => s.id === stepId);
+            return (
+              <Badge key={stepId} variant="outline" className="bg-blue-50 text-blue-700 border-blue-300 flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {step?.name || formatStepName(stepId)}
+              </Badge>
+            );
+          })}
+        </div>
       )}
       
       {/* Workflow Diagram */}
@@ -189,6 +240,8 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
             steps={appraisalSteps}
             onStepClick={handleReprocessStep}
             onStepHover={setSelectedStep}
+            activeStepId={activeStepId}
+            pendingSteps={pendingSteps}
           />
         </CardContent>
       </Card>
@@ -201,6 +254,12 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
         <p className="text-sm text-muted-foreground">
           {selectedStep ? selectedStep.description : "Select any step to reprocess it"}
         </p>
+        {selectedStep && pendingSteps.includes(selectedStep.id) && (
+          <p className="text-xs text-blue-600 mt-1">
+            <Loader2 className="h-3 w-3 inline-block mr-1 animate-spin" />
+            This step is currently being processed in the background
+          </p>
+        )}
       </div>
       
       {/* Complete Reprocessing Option */}

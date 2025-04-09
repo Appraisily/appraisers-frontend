@@ -7,7 +7,13 @@ import { CheckCircle, XCircle, Loader2, Circle } from 'lucide-react';
  * Displays a visual representation of the appraisal workflow
  * using native React components instead of Mermaid.js
  */
-const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
+const WorkflowDiagram = ({ 
+  steps = [], 
+  onStepClick, 
+  onStepHover, 
+  activeStepId = null,
+  pendingSteps = []
+}) => {
   // Get status icon based on step status
   const getStatusIcon = (status) => {
     switch(status?.toLowerCase()) {
@@ -25,7 +31,17 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
   };
 
   // Get background color based on step status
-  const getStatusColor = (status) => {
+  const getStatusColor = (status, stepId) => {
+    // Check if this step is the active one that was just clicked
+    if (activeStepId === stepId) {
+      return 'bg-blue-100 border-blue-300 shadow-md';
+    }
+    
+    // Check if this step is in the pending list
+    if (pendingSteps.includes(stepId)) {
+      return 'bg-blue-50 border-blue-300 shadow-sm';
+    }
+    
     switch(status?.toLowerCase()) {
       case 'completed':
         return 'bg-green-50 border-green-200';
@@ -48,16 +64,25 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
             {/* Step node */}
             <div 
               className={`flex flex-col items-center p-3 border rounded-md cursor-pointer transition-colors 
-                ${getStatusColor(step.status)} hover:shadow-md flex-1 min-w-[120px]`}
+                ${getStatusColor(step.status, step.id)} hover:shadow-md flex-1 min-w-[120px]
+                ${pendingSteps.includes(step.id) ? 'pulse-background' : ''}`}
               onClick={() => onStepClick?.(step.id)}
               onMouseEnter={() => onStepHover?.(step)}
               onMouseLeave={() => onStepHover?.(null)}
               title={step.description}
+              data-active={activeStepId === step.id}
+              data-pending={pendingSteps.includes(step.id)}
             >
               <div className="flex items-center gap-2">
                 {getStatusIcon(step.status)}
                 <span className="font-medium text-sm">{step.name}</span>
               </div>
+              {pendingSteps.includes(step.id) && (
+                <span className="text-xs text-blue-600 mt-1 flex items-center">
+                  <span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full mr-1 animate-pulse"></span>
+                  Processing
+                </span>
+              )}
             </div>
             
             {/* Arrow connector */}
@@ -94,6 +119,17 @@ const WorkflowDiagram = ({ steps = [], onStepClick, onStepHover }) => {
             width: 100%;
             margin: 0 auto;
           }
+        }
+        
+        /* Add pulse animation for processing steps */
+        @keyframes pulse-bg {
+          0% { background-color: rgba(59, 130, 246, 0.1); }
+          50% { background-color: rgba(59, 130, 246, 0.2); }
+          100% { background-color: rgba(59, 130, 246, 0.1); }
+        }
+        
+        .pulse-background {
+          animation: pulse-bg 2s infinite ease-in-out;
         }
       `}</style>
     </div>
