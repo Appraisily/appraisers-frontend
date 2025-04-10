@@ -13,6 +13,8 @@ import AppraisalDetails from '../components/AppraisalDetails';
 import * as appraisalService from '../services/appraisals';
 import { checkAuth } from '../services/auth';
 import './AppraisalPage.css';
+import BasicInfoCard from "@/components/details/BasicInfoCard";
+import { Check, X } from "lucide-react";
 
 const CompletedAppraisalPage = () => {
   const { id: appraisalId } = useParams();
@@ -185,6 +187,22 @@ const CompletedAppraisalPage = () => {
     .replace(/&#217;/g, "'")
     .replace(/&amp;/g, "&");
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -202,6 +220,42 @@ const CompletedAppraisalPage = () => {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
           </Button>
         </div>
+        
+        {appraisal && (
+          <Card className="mb-4">
+            <CardContent className="pt-6">
+              <BasicInfoCard
+                basicInfo={{
+                  customer_email: appraisal.customerEmail,
+                  customer_name: appraisal.customerName,
+                  post_id: appraisal.postId,
+                  appraisal_value: appraisal.appraisalValue || appraisal.value || appraisal.metadata?.value,
+                  date: formatDate(appraisal.date),
+                  created_at: formatDate(appraisal.metadata?.created_at || appraisal.createdAt),
+                  updated_at: formatDate(appraisal.metadata?.updated_at || appraisal.updatedAt),
+                  published_date: formatDate(appraisal.metadata?.published_date || appraisal.publishedDate)
+                }}
+                links={{
+                  admin: appraisal.links?.admin || appraisal.wordpressUrl || '',
+                  public: appraisal.links?.public || '',
+                  pdf: appraisal.links?.pdf || appraisal.metadata?.pdf_url || '',
+                  gcsBackup: appraisal.gcsBackupUrl || '',
+                }}
+                formatCurrency={(value) => {
+                  if (!value && value !== 0) return 'N/A';
+                  const numValue = parseFloat(value);
+                  if (isNaN(numValue)) return 'N/A';
+                  return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                  }).format(numValue);
+                }}
+              />
+            </CardContent>
+          </Card>
+        )}
         
         {successMessage && (
           <Alert className="mb-3 border-green-200 bg-green-50 text-green-700">

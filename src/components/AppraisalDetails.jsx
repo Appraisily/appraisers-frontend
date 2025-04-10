@@ -12,13 +12,12 @@ import {
   LineChart, AlignLeft, Newspaper, ArrowUpRight, Search, LinkIcon
 } from "lucide-react";
 
-// Import the new sub-components
-import BasicInfoCard from './details/BasicInfoCard';
-import ArtworkDetailsCard from './details/ArtworkDetailsCard';
-import StatisticsCard from './details/StatisticsCard';
-import DescriptionsCard from './details/DescriptionsCard';
-import ProcessingStatusCard from './details/ProcessingStatusCard';
-import WordPressCard from './details/WordPressCard';
+// Import components without BasicInfoCard
+import ArtworkDetailsCard from '@/components/details/ArtworkDetailsCard';
+import StatisticsCard from '@/components/details/StatisticsCard';
+import DescriptionsCard from '@/components/details/DescriptionsCard';
+import WordPressCard from '@/components/details/WordPressCard';
+import ProcessingStatusCard from '@/components/details/ProcessingStatusCard';
 
 // --- Helper Components ---
 const DetailItem = ({ label, value, icon: Icon, isLink = false, linkHref = '#' }) => {
@@ -263,9 +262,8 @@ const AppraisalDetails = ({ appraisalData }) => {
         </div>
       )}
       
-      <Tabs defaultValue="basic" className="mb-6 w-full">
+      <Tabs defaultValue="artwork" className="mb-6 w-full">
         <TabsList className="w-full h-auto justify-start">
-          <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
           <TabsTrigger value="artwork" className="flex-1">Artwork Details</TabsTrigger>
           <TabsTrigger value="statistics" className="flex-1">Statistics {hasStatistics && '✓'}</TabsTrigger>
           <TabsTrigger value="descriptions" className="flex-1">Descriptions</TabsTrigger>
@@ -273,14 +271,6 @@ const AppraisalDetails = ({ appraisalData }) => {
           <TabsTrigger value="wordpress" className="flex-1">WordPress {hasWordPressError ? '⚠️' : ''}</TabsTrigger>
         </TabsList>
       
-        <TabsContent value="basic" className="w-full">
-          <BasicInfoCard 
-            basicInfo={basicInfo} 
-            links={links} 
-            formatCurrency={formatCurrency} 
-          />
-        </TabsContent>
-        
         <TabsContent value="artwork" className="w-full">
           <ArtworkDetailsCard 
             artworkDetails={artworkDetails} 
