@@ -128,9 +128,19 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       // Call API in the background
       appraisalService.reprocessStep(appraisalId, stepId)
         .then(response => {
-          // On success, show a toast notification if available
-          if (onComplete) {
-            onComplete(`Step '${formatStepName(stepId)}' reprocessing initiated. Refreshing will show updated status.`);
+          // For regenerate_statistics step, don't refresh the page, just show notification
+          if (stepId === 'regenerate_statistics') {
+            // Keep the step in pendingSteps to show it's still processing
+            setProcessingResult({
+              success: true,
+              message: `Statistics regeneration initiated. This process will continue in the background.`,
+              isTemporary: false
+            });
+          } else {
+            // For other steps, handle as before
+            if (onComplete) {
+              onComplete(`Step '${formatStepName(stepId)}' reprocessing initiated. Refreshing will show updated status.`, stepId);
+            }
           }
         })
         .catch(error => {
@@ -146,8 +156,8 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       setIsProcessing(false);
       setActiveStepId(null);
       
-      // Clear the temporary success message after a few seconds
-      if (processingResult?.isTemporary) {
+      // Clear the temporary success message after a few seconds, but only if not regenerate_statistics
+      if (processingResult?.isTemporary && stepId !== 'regenerate_statistics') {
         setTimeout(() => {
           setProcessingResult(null);
         }, 5000);
@@ -163,6 +173,9 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       setIsProcessing(true);
       setProcessingError(null);
       
+      // Add statistics generation to pendingSteps since it's part of complete reprocessing
+      setPendingSteps(prev => [...prev, 'regenerate_statistics']);
+      
       // Show immediate feedback
       setProcessingResult({
         success: true,
@@ -176,23 +189,22 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       appraisalService.reprocessCompletedAppraisal(appraisalId)
         .then(response => {
           if (onComplete) {
-            onComplete('Complete appraisal reprocessing initiated. Refreshing will show updated status.');
+            // Pass special value to indicate complete reprocessing but highlight statistics step
+            onComplete('Complete appraisal reprocessing initiated. Statistics generation will continue in the background.', 'regenerate_statistics');
           }
         })
         .catch(error => {
           console.error('Error reprocessing completed appraisal:', error);
           setProcessingError(error.message || 'Failed to reprocess appraisal. Please try again.');
+          // Remove from pending steps
+          setPendingSteps(prev => prev.filter(s => s !== 'regenerate_statistics'));
         });
       
     } finally {
       setIsProcessing(false);
       
-      // Clear the temporary success message after a few seconds
-      if (processingResult?.isTemporary) {
-        setTimeout(() => {
-          setProcessingResult(null);
-        }, 5000);
-      }
+      // For complete reprocessing, don't automatically clear the message
+      // as the statistics regeneration will continue in the background
     }
   };
   
