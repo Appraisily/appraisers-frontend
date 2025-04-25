@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Clock, Info, BarChart, FileText, AlignLeft, Check, X, AlertTriangle } from "lucide-react";
+import { Info, BarChart, FileText, AlignLeft, Check, X, AlertTriangle } from "lucide-react";
 
 const ProcessingStatusCard = ({ processingInfo, renderBoolean, renderSimpleValue }) => {
   if (!processingInfo) return null;
@@ -17,14 +17,6 @@ const ProcessingStatusCard = ({ processingInfo, renderBoolean, renderSimpleValue
          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
           {/* First column */}
           <div className="space-y-2">
-            {processingInfo.last_processed && (
-              <div className="flex items-baseline gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
-                <span className="font-medium w-32 shrink-0">Last Processed:</span>
-                <span>{processingInfo.last_processed}</span>
-              </div>
-            )}
-            
             {processingInfo.appraisal_status && (
               <div className="flex items-baseline gap-2 text-sm">
                 <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
