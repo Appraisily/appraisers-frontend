@@ -53,22 +53,16 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       status: getCombinedStepStatus(appraisal, ['data_collection', 'metadata_extraction', 'enhance_description'])
     },
     {
-      id: 'value_assessment',
-      name: 'Value Assessment',
-      description: 'Calculates and justifies the appraised value.',
-      status: getStepStatus(appraisal, 'value_assessment')
+      id: 'metadata_reprocessing',
+      name: 'Metadata Reprocessing',
+      description: 'Updates operator backend with refined metadata to ensure consistency across systems.',
+      status: getStepStatus(appraisal, 'metadata_reprocessing')
     },
     {
-      id: 'regenerate_statistics',
-      name: 'Statistics Generation',
-      description: 'Computes market comparisons and statistical analysis.',
-      status: getStepStatus(appraisal, 'regenerate_statistics')
-    },
-    {
-      id: 'generate_html',
-      name: 'HTML Visualization',
-      description: 'Creates interactive charts and visual elements.',
-      status: getStepStatus(appraisal, 'generate_html')
+      id: 'statistics_visualization',
+      name: 'Statistics & Visualization',
+      description: 'Computes market comparisons, statistical analysis, and creates interactive visualizations.',
+      status: getCombinedStepStatus(appraisal, ['regenerate_statistics', 'generate_html'])
     },
     {
       id: 'generate_pdf',
@@ -211,7 +205,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
         'metadata_extraction', 
         'enhance_description',
         // Add the remaining steps
-        'value_assessment',
+        'metadata_reprocessing',
         'regenerate_statistics',
         'generate_html',
         'generate_pdf'
