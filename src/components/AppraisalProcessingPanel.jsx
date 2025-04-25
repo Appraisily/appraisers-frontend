@@ -46,22 +46,11 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
   // Define all possible appraisal processing steps
   const appraisalSteps = [
     {
-      id: 'data_collection',
-      name: 'Data Collection',
-      description: 'Gathers all input data from customer submission and databases.',
-      status: getStepStatus(appraisal, 'data_collection')
-    },
-    {
-      id: 'metadata_extraction',
-      name: 'Metadata Extraction',
-      description: 'Extracts key details like artist, medium, dimensions and creation date.',
-      status: getStepStatus(appraisal, 'metadata_extraction')
-    },
-    {
-      id: 'enhance_description',
+      id: 'ai_analysis',
       name: 'AI Analysis',
-      description: 'Uses AI to analyze artistic elements and historical context.',
-      status: getStepStatus(appraisal, 'enhance_description')
+      description: 'Collects data, extracts metadata, and analyzes artwork using AI to create comprehensive description.',
+      // Combine status of the three original steps - if any is processing or has an error, show that status
+      status: getCombinedStepStatus(appraisal, ['data_collection', 'metadata_extraction', 'enhance_description'])
     },
     {
       id: 'value_assessment',
@@ -102,6 +91,40 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
     
     return step ? step.status : 'pending';
   }
+
+  // Function to get the combined status for merged steps
+  function getCombinedStepStatus(appraisal, stepIds) {
+    if (!appraisal || !appraisal.steps) return 'pending';
+    
+    // Check if any of the steps are in pendingSteps array
+    if (stepIds.some(id => pendingSteps.includes(id))) {
+      return 'processing';
+    }
+
+    // Find the status of each step
+    const statuses = stepIds.map(id => {
+      const step = appraisal.steps.find(s => s.name === id);
+      return step ? step.status : 'pending';
+    });
+    
+    // If any step is processing, the combined step is processing
+    if (statuses.includes('processing') || statuses.includes('in-progress')) {
+      return 'processing';
+    }
+    
+    // If any step failed, the combined step failed
+    if (statuses.includes('failed') || statuses.includes('error')) {
+      return 'failed';
+    }
+    
+    // If all steps are completed, the combined step is completed
+    if (statuses.every(status => status === 'completed')) {
+      return 'completed';
+    }
+    
+    // Default to pending
+    return 'pending';
+  }
   
   // Handle reprocessing a specific step
   const handleReprocessStep = async (stepId) => {
@@ -113,8 +136,16 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       setIsProcessing(true);
       setProcessingError(null);
       
+      // For the combined AI Analysis step, we need to process the enhance_description step
+      const backendStepId = stepId === 'ai_analysis' ? 'enhance_description' : stepId;
+      
       // Add this step to pendingSteps
-      setPendingSteps(prev => [...prev, stepId]);
+      if (stepId === 'ai_analysis') {
+        // For the AI Analysis step, add all three substeps to pendingSteps
+        setPendingSteps(prev => [...prev, 'data_collection', 'metadata_extraction', 'enhance_description']);
+      } else {
+        setPendingSteps(prev => [...prev, stepId]);
+      }
       
       // Show immediate feedback to the user
       setProcessingResult({
@@ -123,10 +154,10 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
         isTemporary: false
       });
       
-      console.log(`Reprocessing step ${stepId} for appraisal ${appraisalId}`);
+      console.log(`Reprocessing step ${backendStepId} for appraisal ${appraisalId}`);
       
-      // Call API in the background
-      appraisalService.reprocessStep(appraisalId, stepId)
+      // Call API in the background with the actual backend step
+      appraisalService.reprocessStep(appraisalId, backendStepId)
         .then(response => {
           // For all steps, don't refresh the page, just show notification that processing was initiated
           setProcessingResult({
@@ -144,8 +175,13 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
           console.error('Error reprocessing step:', error);
           // Show error in UI
           setProcessingError(`Failed to reprocess step: ${formatStepName(stepId)}. ${error.message}`);
-          // Remove from pending steps
-          setPendingSteps(prev => prev.filter(s => s !== stepId));
+          // Remove from pendingSteps
+          if (stepId === 'ai_analysis') {
+            // Remove all three substeps
+            setPendingSteps(prev => prev.filter(s => !['data_collection', 'metadata_extraction', 'enhance_description'].includes(s)));
+          } else {
+            setPendingSteps(prev => prev.filter(s => s !== stepId));
+          }
         });
       
     } finally {
@@ -167,8 +203,19 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       setProcessingError(null);
       
       // Add all steps to pendingSteps to show they're all being processed
-      const allStepIds = appraisalSteps.map(step => step.id);
-      setPendingSteps(prev => [...prev, ...allStepIds]);
+      // For the combined steps, add the original backend steps
+      setPendingSteps(prev => [
+        ...prev, 
+        // Add the three original steps for AI Analysis
+        'data_collection', 
+        'metadata_extraction', 
+        'enhance_description',
+        // Add the remaining steps
+        'value_assessment',
+        'regenerate_statistics',
+        'generate_html',
+        'generate_pdf'
+      ]);
       
       // Show immediate feedback
       setProcessingResult({
