@@ -130,13 +130,23 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       setIsProcessing(true);
       setProcessingError(null);
       
-      // For the combined AI Analysis step, we need to process the enhance_description step
-      const backendStepId = stepId === 'ai_analysis' ? 'enhance_description' : stepId;
+      // Map frontend step IDs to backend step IDs
+      let backendStepId;
+      if (stepId === 'ai_analysis') {
+        backendStepId = 'enhance_description';
+      } else if (stepId === 'statistics_visualization') {
+        backendStepId = 'regenerate_statistics'; // Use the backend's statistics regeneration endpoint
+      } else {
+        backendStepId = stepId;
+      }
       
       // Add this step to pendingSteps
       if (stepId === 'ai_analysis') {
         // For the AI Analysis step, add all three substeps to pendingSteps
         setPendingSteps(prev => [...prev, 'data_collection', 'metadata_extraction', 'enhance_description']);
+      } else if (stepId === 'statistics_visualization') {
+        // For the combined Statistics & Visualization step, add both substeps
+        setPendingSteps(prev => [...prev, 'regenerate_statistics', 'generate_html']);
       } else {
         setPendingSteps(prev => [...prev, stepId]);
       }
@@ -173,6 +183,9 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
           if (stepId === 'ai_analysis') {
             // Remove all three substeps
             setPendingSteps(prev => prev.filter(s => !['data_collection', 'metadata_extraction', 'enhance_description'].includes(s)));
+          } else if (stepId === 'statistics_visualization') {
+            // Remove both statistics steps
+            setPendingSteps(prev => prev.filter(s => !['regenerate_statistics', 'generate_html'].includes(s)));
           } else {
             setPendingSteps(prev => prev.filter(s => s !== stepId));
           }
