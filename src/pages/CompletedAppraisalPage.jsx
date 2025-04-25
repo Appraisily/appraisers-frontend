@@ -74,19 +74,11 @@ const CompletedAppraisalPage = () => {
   const handleProcessingComplete = (message, stepName) => {
     setSuccessMessage(message || 'Step processing completed successfully.');
     
-    // Don't refresh the page for statistics regeneration
-    if (stepName === 'regenerate_statistics') {
-      // Just display the message, don't reload the data
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
-    } else {
-      // For all other steps, reload the data as before
-      loadAppraisalDetails();
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 5000);
-    }
+    // Don't refresh the page for any step processing
+    // Just display the message that processing has been initiated
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 8000);
   };
   
   const handleReprocessCompletedAppraisal = async () => {
