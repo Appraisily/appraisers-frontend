@@ -118,7 +118,6 @@ npm run lint
 - `WorkflowDiagram.jsx`: Visual representation of appraisal workflow
 - `MermaidDiagram.jsx`: Renders mermaid diagrams
 - `LoginForm.jsx`: Authentication form
-- `GoogleSignIn.jsx`: Google OAuth 2.0 integration
 - `Header.jsx`: Application header with navigation and user info
 - `PaginationControls.jsx`: Controls for paginating large datasets
 - `StatusUpdateToast.jsx`: Notification component for status updates
@@ -140,7 +139,6 @@ Main functions:
 Manages authentication processes.
 
 Main functions:
-- `loginWithGoogle(credential)`: Authenticates using Google OAuth 
 - `login(email, password)`: Email/password authentication
 - `logout()`: Logs out user and clears tokens
 - `refreshToken()`: Refreshes authentication token
@@ -173,9 +171,6 @@ Main functions:
 ```env
 # Required - Backend API URL
 VITE_BACKEND_URL=https://appraisers-backend-856401495068.us-central1.run.app
-
-# Optional - Google client ID for authentication
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
 
 # Environment name
 VITE_APP_ENV=development
@@ -249,23 +244,6 @@ export const ENDPOINTS = {
 ## API Endpoints
 
 ### Authentication
-
-#### Google Sign-In
-```http
-POST /api/auth/google
-Content-Type: application/json
-
-{
-  "credential": "google_id_token"
-}
-```
-Response:
-```json
-{
-  "success": true,
-  "name": "User Name"
-}
-```
 
 #### Logout
 ```http
@@ -524,7 +502,6 @@ Important note: No secrets are hardcoded in the source code.
 - CORS enabled
 - Secure cookie handling
 - JWT token management
-- Google OAuth 2.0 integration
 - Input validation and sanitization
 
 ## License
