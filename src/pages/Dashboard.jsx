@@ -32,17 +32,6 @@ const Dashboard = () => {
     }
   }, [currentAppraisalType]);
 
-  // Add a refresh interval to check for updates periodically
-  useEffect(() => {
-    const refreshInterval = setInterval(() => {
-      if (checkAuth()) {
-        loadAppraisals(currentAppraisalType);
-      }
-    }, 60000); // Refresh every minute
-
-    return () => clearInterval(refreshInterval);
-  }, [currentAppraisalType]);
-
   useEffect(() => {
     // Reset to first page when changing appraisal type
     setCurrentPage(1);
