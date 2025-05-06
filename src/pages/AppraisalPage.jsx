@@ -31,6 +31,15 @@ const AppraisalPage = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Function to check if an appraisal is a bulk type
+  const isBulkAppraisal = (appraisal) => {
+    if (!appraisal || !appraisal.appraisalType) return false;
+    
+    // Check if appraisal type matches the Bulk pattern (e.g., Bulk_Regular_8)
+    return appraisal.appraisalType.startsWith('Bulk_') || 
+           appraisal.appraisalType.includes('Bulk');
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -53,6 +62,13 @@ const AppraisalPage = () => {
           console.log('API Response (Pending):', response.data);
           
           if (mounted && response.data) {
+            // Check if this is a bulk appraisal and redirect if it is
+            if (isBulkAppraisal(response.data)) {
+              console.log('Bulk appraisal detected, redirecting to bulk processing page');
+              navigate(`/bulk-appraisal?id=${appraisalId}`);
+              return;
+            }
+            
             setAppraisalData(response.data);
             const hasWordPressUrl = response.data.wordpressUrl && response.data.wordpressUrl.trim() !== '';
             setShowManualForm(!hasWordPressUrl);

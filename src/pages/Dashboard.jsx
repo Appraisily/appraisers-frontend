@@ -161,8 +161,16 @@ const Dashboard = () => {
                 name: appraisal.customerName || ''
               });
 
-              if (currentAppraisalType === 'pending') {
-                navigate(`/appraisal?${params.toString()}`);
+              // Check if this is a bulk appraisal
+              const isBulkAppraisal = appraisal.appraisalType && 
+                (appraisal.appraisalType.startsWith('Bulk_') || 
+                 appraisal.appraisalType.includes('Bulk'));
+
+              if (isBulkAppraisal) {
+                console.log('Bulk appraisal detected in dashboard, navigating to bulk processing page');
+                navigate(`/bulk-appraisal?id=${appraisal.id}`);
+              } else if (currentAppraisalType === 'pending') {
+                navigate(`/appraisals/pending/${appraisal.id}`);
               } else {
                 navigate(`/edit-appraisal?${params.toString()}`);
               }
