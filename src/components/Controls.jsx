@@ -1,67 +1,67 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RefreshCw, Trash2 } from "lucide-react";
+import { RefreshCw, Plus } from "lucide-react";
 
 const Controls = ({ 
-  onPendingClick, 
-  onCompletedClick, 
-  onSearch, 
-  onRefresh, 
+  currentAppraisalType, 
+  onTypeChange, 
+  onSearch,
+  onRefresh,
   isRefreshing,
-  onCleanPendingClick,
-  currentAppraisalType
+  onNewAppraisal
 }) => {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Button
-            variant="default"
+            variant={currentAppraisalType === 'pending' ? 'default' : 'outline'}
             size="sm"
-            onClick={onPendingClick}
-            className="bg-green-600 hover:bg-green-700"
+            onClick={() => onTypeChange('pending')}
+            className={currentAppraisalType === 'pending' ? "bg-green-600 hover:bg-green-700" : ""}
           >
             Pending
           </Button>
           <Button
-            variant="default"
+            variant={currentAppraisalType === 'completed' ? 'default' : 'outline'}
             size="sm"
-            onClick={onCompletedClick}
+            onClick={() => onTypeChange('completed')}
           >
             Completed
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            className="h-8 w-8"
-            title="Refresh list"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-          {currentAppraisalType === 'pending' && (
+          {onRefresh && (
             <Button
               variant="outline"
-              size="sm"
-              onClick={onCleanPendingClick}
+              size="icon"
+              onClick={onRefresh}
               disabled={isRefreshing}
-              className="text-orange-600 border-orange-600 hover:bg-orange-50 hover:text-orange-700"
-              title="Clean Pending List"
+              className="h-8 w-8"
+              title="Refresh list"
             >
-              <Trash2 className="h-4 w-4 mr-2" /> 
-              Clean List
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           )}
         </div>
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search appraisals..."
-            onChange={(e) => onSearch(e.target.value)}
-            className="w-[250px] h-8"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Search appraisals..."
+              onChange={(e) => onSearch(e.target.value)}
+              className="w-[250px] h-8"
+            />
+          </div>
+          {onNewAppraisal && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onNewAppraisal}
+              className="ml-2"
+            >
+              <Plus className="h-4 w-4 mr-1" /> New Appraisal
+            </Button>
+          )}
         </div>
       </div>
     </div>

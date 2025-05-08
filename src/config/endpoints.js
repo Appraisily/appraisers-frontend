@@ -4,28 +4,29 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const ENDPOINTS = {
   AUTH: {
-    LOGIN: `${API_BASE_URL}${API_ROUTES.AUTH.LOGIN}`,
-    LOGOUT: `${API_BASE_URL}${API_ROUTES.AUTH.LOGOUT}`,
-    REFRESH: `${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`
+    LOGIN: '/api/auth/login',
+    REFRESH: '/api/auth/refresh',
+    LOGOUT: '/api/auth/logout'
   },
   APPRAISALS: {
-    LIST: `${API_BASE_URL}${API_ROUTES.APPRAISALS.LIST}`,
-    COMPLETED: `${API_BASE_URL}${API_ROUTES.APPRAISALS.COMPLETED}`,
-    DETAILS: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.DETAILS.replace(':id', id)}`,
-    DETAILS_EDIT: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.DETAILS_EDIT.replace(':id', id)}`,
-    COMPLETED_DETAILS: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.COMPLETED_DETAILS.replace(':id', id)}`,
-    CLEAN_PENDING_LIST: `${API_BASE_URL}${API_ROUTES.APPRAISALS.CLEAN_PENDING_LIST}`,
-    REPROCESS_STEP: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.REPROCESS_STEP.replace(':id', id)}`,
-    COMPLETE: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.COMPLETE_PROCESS.replace(':id', id)}`,
-    COMPLETE_PROCESS: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.COMPLETE_PROCESS.replace(':id', id)}`,
-    SET_VALUE: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.SET_VALUE.replace(':id', id)}`,
-    BY_SESSION_ID: (sessionId) => `${API_BASE_URL}/api/appraisals/session/${sessionId}`,
-    BULK_IMAGES: (id) => `${API_BASE_URL}/api/appraisals/${id}/bulk-images`,
-    PROCESS_BULK: (id) => `${API_BASE_URL}/api/appraisals/${id}/process-bulk`,
-    PDF_STEPS: `${API_BASE_URL}${API_ROUTES.APPRAISALS.PDF_STEPS}`,
-    GENERATE_PDF_STEPS: `${API_BASE_URL}${API_ROUTES.APPRAISALS.GENERATE_PDF_STEPS}`,
-    PROCESS_STEPS: `${API_BASE_URL}${API_ROUTES.APPRAISALS.PROCESS_STEPS}`,
-    PROCESS_FROM_STEP: (id) => `${API_BASE_URL}${API_ROUTES.APPRAISALS.PROCESS_FROM_STEP.replace(':id', id)}`,
-    REPROCESS_COMPLETED: (id) => `${API_BASE_URL}/api/appraisals/${id}/reprocess-completed`
+    LIST: '/api/appraisals',
+    COMPLETED: '/api/appraisals/completed',
+    CLEANUP_MOVED: '/api/appraisals/cleanup-moved-completed',
+    DETAILS: (id) => `/api/appraisals/${id}/list`,
+    DETAILS_EDIT: (id) => `/api/appraisals/${id}/list-edit`,
+    SET_VALUE: (id) => `/api/appraisals/${id}/set-value`,
+    COMPLETE_PROCESS: (id) => `/api/appraisals/${id}/complete-process`,
+    PROCESS_WORKER: '/api/appraisals/process-worker',
+    COMPLETED_DETAILS: (id) => `/api/appraisals/completed/${id}`,
+    REPROCESS_STEP: (id) => `/api/appraisals/${id}/reprocess-step`,
+    COMPLETE: (id) => `/api/appraisals/${id}/complete-process`,
+    BY_SESSION_ID: (sessionId) => `/api/appraisals/session/${sessionId}`,
+    BULK_IMAGES: (id) => `/api/appraisals/${id}/bulk-images`,
+    PROCESS_BULK: (id) => `/api/appraisals/${id}/process-bulk`,
+    PDF_STEPS: '/api/appraisals/pdf-steps',
+    GENERATE_PDF_STEPS: '/api/appraisals/generate-pdf-steps',
+    PROCESS_STEPS: '/api/appraisals/process-steps',
+    PROCESS_FROM_STEP: (id) => `/api/appraisals/${id}/process-from-step`,
+    REPROCESS_COMPLETED: (id) => `/api/appraisals/${id}/reprocess-completed`
   }
 };
