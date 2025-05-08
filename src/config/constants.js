@@ -10,6 +10,7 @@ export const API_ROUTES = {
     DETAILS: '/api/appraisals/:id/list',
     DETAILS_EDIT: '/api/appraisals/:id/list-edit',
     COMPLETED_DETAILS: '/api/appraisals/:id/details',
+    CLEAN_PENDING_LIST: '/api/appraisals/clean-pending-list',
     REPROCESS_STEP: '/api/appraisals/:id/reprocess-step',
     COMPLETE_PROCESS: '/api/appraisals/:id/complete-process',
     SET_VALUE: '/api/appraisals/:id/set-value',

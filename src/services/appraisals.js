@@ -282,3 +282,13 @@ export const reprocessCompletedAppraisal = async (id) => {
     throw error;
   }
 };
+
+export const cleanPendingList = async () => {
+  try {
+    const response = await api.post(ENDPOINTS.APPRAISALS.CLEAN_PENDING_LIST);
+    return response.data;
+  } catch (error) {
+    console.error('Error cleaning pending list:', error);
+    throw new Error(error.response?.data?.message || error.message || 'Failed to clean pending list');
+  }
+};

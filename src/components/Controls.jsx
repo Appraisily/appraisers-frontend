@@ -1,14 +1,16 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Trash2 } from "lucide-react";
 
 const Controls = ({ 
   onPendingClick, 
   onCompletedClick, 
   onSearch, 
   onRefresh, 
-  isRefreshing
+  isRefreshing,
+  onCleanPendingClick,
+  currentAppraisalType
 }) => {
   return (
     <div className="mb-6">
@@ -39,6 +41,19 @@ const Controls = ({
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
+          {currentAppraisalType === 'pending' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onCleanPendingClick}
+              disabled={isRefreshing}
+              className="text-orange-600 border-orange-600 hover:bg-orange-50 hover:text-orange-700"
+              title="Clean Pending List"
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> 
+              Clean List
+            </Button>
+          )}
         </div>
         <div className="relative">
           <Input

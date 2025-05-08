@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as appraisalService from '../services/appraisals';
 import { checkAuth } from '../services/auth';
@@ -11,6 +11,7 @@ import LoginForm from '../components/LoginForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -23,21 +24,9 @@ const Dashboard = () => {
   const [itemsPerPage] = useState(10);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (checkAuth()) {
-      loadAppraisals(currentAppraisalType);
-    } else {
-      setLoading(false);
-    }
-  }, [currentAppraisalType]);
-
-  useEffect(() => {
-    // Reset to first page when changing appraisal type
-    setCurrentPage(1);
-  }, [currentAppraisalType]);
-
-  const loadAppraisals = async (type) => {
+  const loadAppraisals = useCallback(async (type) => {
     try {
       setLoading(true);
       setError(null);
@@ -47,35 +36,49 @@ const Dashboard = () => {
         appraisalService.getPending()
       );
 
-      // Sort the appraisals based on type:
-      // - Completed appraisals: Most recent first (newest to oldest)
-      // - Pending appraisals: Oldest first (oldest to newest)
       const sortedData = [...data].sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
+        const dateA = new Date(a.date || a.createdAt);
+        const dateB = new Date(b.date || b.createdAt);
         
         if (type === 'completed') {
-          return dateB - dateA; // Most recent first for completed
+          return dateB - dateA; 
         } else {
-          return dateA - dateB; // Oldest first for pending
+          return dateA - dateB; 
         }
       });
 
       setAppraisalsList(sortedData);
       setAllAppraisals(sortedData);
-      setCurrentPage(1); // Reset to first page when loading new data
+      setCurrentPage(1); 
     } catch (err) {
       console.error('Error loading appraisals:', err);
       setError(err.message || 'Failed to load appraisals');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err.message || 'Failed to load appraisals',
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (checkAuth()) {
+      loadAppraisals(currentAppraisalType);
+    } else {
+      setLoading(false);
+    }
+  }, [currentAppraisalType, loadAppraisals]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentAppraisalType]);
 
   const handleSearch = (query) => {
     if (!query.trim()) {
       setAppraisalsList(allAppraisals);
-      setCurrentPage(1); // Reset to first page when clearing search
+      setCurrentPage(1);
       return;
     }
 
@@ -87,7 +90,29 @@ const Dashboard = () => {
     );
 
     setAppraisalsList(filteredAppraisals);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
+  };
+
+  const handleCleanPendingList = async () => {
+    setLoading(true);
+    try {
+      const result = await appraisalService.cleanPendingList();
+      toast({
+        title: "Success",
+        description: result.message || "Pending list cleaned successfully.",
+      });
+      await loadAppraisals('pending');
+    } catch (err) {
+      console.error('Error cleaning pending list:', err);
+      toast({
+        variant: "destructive",
+        title: "Error Cleaning List",
+        description: err.message || "Failed to clean the pending list.",
+      });
+      setError(err.message || "Failed to clean the pending list.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Get current page items
@@ -96,7 +121,6 @@ const Dashboard = () => {
   const currentItems = appraisalsList.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(appraisalsList.length / itemsPerPage);
 
-  // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (!userName) {
@@ -134,7 +158,7 @@ const Dashboard = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8 relative">
-        {error && (
+        {error && !loading && (
           <div className="p-4 mb-4 text-sm text-red-500 bg-red-50 rounded-lg border border-red-200">
             {error}
           </div>
@@ -146,6 +170,8 @@ const Dashboard = () => {
           onSearch={handleSearch}
           isRefreshing={loading}
           onRefresh={() => loadAppraisals(currentAppraisalType)}
+          currentAppraisalType={currentAppraisalType}
+          onCleanPendingClick={handleCleanPendingList}
         />
 
         <div className="relative">
@@ -161,7 +187,6 @@ const Dashboard = () => {
                 name: appraisal.customerName || ''
               });
 
-              // Check if this is a bulk appraisal
               const isBulkAppraisal = appraisal.appraisalType && 
                 (appraisal.appraisalType.startsWith('Bulk_') || 
                  appraisal.appraisalType.includes('Bulk'));
