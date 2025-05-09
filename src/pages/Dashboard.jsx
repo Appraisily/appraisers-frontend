@@ -13,7 +13,6 @@ import Logo from '../components/Logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -25,9 +24,9 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [cleaningList, setCleaningList] = useState(false);
+  const [cleanupMessage, setCleanupMessage] = useState(null);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
-  const { toast } = useToast();
 
   useEffect(() => {
     if (checkAuth()) {
@@ -98,23 +97,22 @@ const Dashboard = () => {
   const handleCleanList = async () => {
     try {
       setCleaningList(true);
+      setCleanupMessage(null);
       const result = await appraisalService.cleanupMovedToCompleted();
       
-      // Show success toast
-      toast({
-        title: "List Cleaned Successfully",
-        description: `${result.cleanedCount} "Moved to Completed" entries have been removed.`,
-        variant: "success",
+      // Show success message
+      setCleanupMessage({
+        type: 'success',
+        text: `${result.cleanedCount} "Moved to Completed" entries have been removed.`
       });
       
       // Reload the list
       await loadAppraisals(currentAppraisalType);
     } catch (error) {
       console.error('Error cleaning list:', error);
-      toast({
-        title: "Error Cleaning List",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
+      setCleanupMessage({
+        type: 'error',
+        text: error.message || "Something went wrong while cleaning the list."
       });
     } finally {
       setCleaningList(false);
@@ -190,6 +188,16 @@ const Dashboard = () => {
               </Button>
             )}
           </div>
+          
+          {cleanupMessage && (
+            <div className={`p-4 mb-2 text-sm rounded-md ${
+              cleanupMessage.type === 'success' 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {cleanupMessage.text}
+            </div>
+          )}
           
           <Controls
             currentAppraisalType={currentAppraisalType}
