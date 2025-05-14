@@ -17,7 +17,7 @@ export const ENDPOINTS = {
     SET_VALUE: (id) => `/api/appraisals/${id}/set-value`,
     COMPLETE_PROCESS: (id) => `/api/appraisals/${id}/complete-process`,
     PROCESS_WORKER: '/api/appraisals/process-worker',
-    COMPLETED_DETAILS: (id) => `/api/appraisals/completed/${id}`,
+    COMPLETED_DETAILS: (id) => `/api/appraisals/${id}/details`,
     REPROCESS_STEP: (id) => `/api/appraisals/${id}/reprocess-step`,
     COMPLETE: (id) => `/api/appraisals/${id}/complete-process`,
     BY_SESSION_ID: (sessionId) => `/api/appraisals/session/${sessionId}`,
