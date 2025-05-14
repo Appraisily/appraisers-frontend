@@ -40,6 +40,7 @@ export const login = async (email, password) => {
     
     if (response.data?.success) {
       localStorage.setItem('userName', response.data.name);
+      localStorage.setItem('lastLoginTime', Date.now().toString());
       return {
         success: true,
         name: response.data.name
@@ -74,15 +75,43 @@ export const logout = async () => {
       throw new Error('Logout failed');
     }
     localStorage.removeItem('userName');
-    window.location.href = '/';
+    localStorage.removeItem('lastLoginTime');
+    window.location.href = '/login';
   } catch (error) {
     console.error('Logout error:', error);
     // Still clear local storage and redirect on error
     localStorage.removeItem('userName');
-    window.location.href = '/';
+    localStorage.removeItem('lastLoginTime');
+    window.location.href = '/login';
   }
 };
 
 export const checkAuth = () => {
-  return !!localStorage.getItem('userName');
+  const userName = localStorage.getItem('userName');
+  const lastLoginTime = localStorage.getItem('lastLoginTime');
+  
+  if (!userName) return false;
+  
+  // Optional: Add session expiration check (e.g., 24 hours)
+  if (lastLoginTime) {
+    const loginTime = parseInt(lastLoginTime, 10);
+    const now = Date.now();
+    const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+    
+    // If more than 24 hours since last login, consider session expired
+    if (hoursSinceLogin > 24) {
+      localStorage.removeItem('userName');
+      localStorage.removeItem('lastLoginTime');
+      return false;
+    }
+  }
+  
+  return true;
+};
+
+// Add a function to force redirect to login page
+export const redirectToLogin = () => {
+  localStorage.removeItem('userName');
+  localStorage.removeItem('lastLoginTime');
+  window.location.href = '/login';
 };

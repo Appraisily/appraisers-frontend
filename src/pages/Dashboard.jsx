@@ -7,7 +7,6 @@ import Footer from '../components/Footer';
 import Controls from '../components/Controls';
 import AppraisalsTable from '../components/AppraisalsTable';
 import PaginationControls from '../components/PaginationControls';
-import LoginForm from '../components/LoginForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Logo from '../components/Logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -32,9 +31,10 @@ const Dashboard = () => {
     if (checkAuth()) {
       loadAppraisals(currentAppraisalType);
     } else {
-      setLoading(false);
+      // Redirect to login page if not authenticated
+      navigate('/login');
     }
-  }, [currentAppraisalType]);
+  }, [currentAppraisalType, navigate]);
 
   useEffect(() => {
     // Reset to first page when changing appraisal type
@@ -128,34 +128,10 @@ const Dashboard = () => {
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  // If not authenticated, the useEffect will redirect to login page
+  // So we don't need to render the login form here anymore
   if (!userName) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="w-full max-w-md space-y-8">
-          <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-            <CardHeader className="space-y-4 flex flex-col items-center pb-8">
-              <div className="flex flex-col items-center gap-4">
-                <Logo size="large" />
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  Appraisily
-                </h1>
-              </div>
-              <div className="space-y-2 text-center">
-                <CardTitle className="text-lg font-semibold tracking-tight">
-                  Welcome to Appraisers Dashboard
-                </CardTitle>
-                <CardDescription className="text-slate-600">
-                  Sign in to manage your appraisals
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <LoginForm />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

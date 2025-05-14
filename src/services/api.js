@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ENDPOINTS } from '../config/endpoints';
+import { redirectToLogin } from './auth';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -44,7 +45,9 @@ api.interceptors.response.use(
 
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't try to refresh if this is already a refresh request
+    if (error.response?.status === 401 && !originalRequest._retry && 
+        !originalRequest.url?.includes(ENDPOINTS.AUTH.REFRESH)) {
       console.log('API Interceptor: Handling 401 error, attempting refresh');
       originalRequest._retry = true;
 
@@ -60,6 +63,7 @@ api.interceptors.response.use(
           return api(originalRequest);
         } catch (err) {
           console.error('API Interceptor: Error during refresh wait:', err);
+          redirectToLogin();
           return Promise.reject(err);
         }
       }
@@ -77,10 +81,16 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         isRefreshing = false;
-        localStorage.removeItem('userName');
-        window.location.href = '/';
+        redirectToLogin();
         return Promise.reject(new Error('Session expired. Please log in again.'));
       }
+    }
+
+    // If both the original request and refresh failed with 401, 
+    // or if refresh endpoint itself returns 401, redirect to login
+    if (error.response?.status === 401 && 
+        (originalRequest._retry || originalRequest.url?.includes(ENDPOINTS.AUTH.REFRESH))) {
+      redirectToLogin();
     }
 
     return Promise.reject(error);

@@ -5,6 +5,7 @@ import AppraisalPage from './pages/AppraisalPage';
 import EditAppraisalPage from './pages/EditAppraisalPage';
 import BulkAppraisalPage from './pages/BulkAppraisalPage';
 import CompletedAppraisalPage from './pages/CompletedAppraisalPage';
+import LoginPage from './pages/LoginPage';
 import './App.css';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
     <div className="min-h-screen bg-background">
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/login" element={<LoginPage />} />
         
         {/* New routes with ID parameters */}
         <Route path="/appraisals/pending/:id" element={<AppraisalPage />} />
