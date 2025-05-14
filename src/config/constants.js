@@ -16,6 +16,7 @@ export const API_ROUTES = {
     PDF_STEPS: '/api/pdf/steps',
     GENERATE_PDF_STEPS: '/api/pdf/generate-pdf-steps',
     PROCESS_STEPS: '/api/appraisals/steps',
-    PROCESS_FROM_STEP: '/api/appraisals/:id/process-from-step'
+    PROCESS_FROM_STEP: '/api/appraisals/:id/process-from-step',
+    SEND_CONFIRMATION_EMAIL: '/api/appraisals/:id/send-confirmation-email'
   }
 };

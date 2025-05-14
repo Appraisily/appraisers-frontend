@@ -27,6 +27,7 @@ export const ENDPOINTS = {
     GENERATE_PDF_STEPS: '/api/appraisals/generate-pdf-steps',
     PROCESS_STEPS: '/api/appraisals/process-steps',
     PROCESS_FROM_STEP: (id) => `/api/appraisals/${id}/process-from-step`,
-    REPROCESS_COMPLETED: (id) => `/api/appraisals/${id}/reprocess-completed`
+    REPROCESS_COMPLETED: (id) => `/api/appraisals/${id}/reprocess-completed`,
+    SEND_CONFIRMATION_EMAIL: (id) => `/api/appraisals/${id}/send-confirmation-email`
   }
 };

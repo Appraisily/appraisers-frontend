@@ -292,3 +292,15 @@ export const cleanupMovedToCompleted = async () => {
     throw new Error(error.message || 'Failed to clean up moved to completed entries');
   }
 };
+
+// New method to send confirmation email
+export const sendConfirmationEmail = async (id) => {
+  try {
+    console.log(`Sending confirmation email for appraisal ${id}`);
+    const response = await api.post(ENDPOINTS.APPRAISALS.SEND_CONFIRMATION_EMAIL(id));
+    return response.data;
+  } catch (error) {
+    console.error('Error sending confirmation email:', error);
+    throw new Error(error.message || 'Failed to send confirmation email');
+  }
+};
