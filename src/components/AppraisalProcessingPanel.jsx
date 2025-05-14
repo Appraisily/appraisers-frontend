@@ -42,6 +42,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
   const [processingError, setProcessingError] = useState(null);
   const [processingResult, setProcessingResult] = useState(null);
   const [pendingSteps, setPendingSteps] = useState([]);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   
   // Define all possible appraisal processing steps
   const appraisalSteps = [
@@ -256,6 +257,45 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
     }
   };
   
+  // Handle sending confirmation email to customer
+  const handleSendConfirmationEmail = async () => {
+    if (!appraisalId || isProcessing || isSendingEmail) return;
+    
+    try {
+      setIsSendingEmail(true);
+      setProcessingError(null);
+      
+      // Show immediate feedback to the user
+      setProcessingResult({
+        success: true,
+        message: `Sending confirmation email to customer...`,
+        isTemporary: false
+      });
+      
+      console.log(`Sending confirmation email for appraisal ${appraisalId}`);
+      
+      // Call API to send the email
+      const response = await appraisalService.sendConfirmationEmail(appraisalId);
+      
+      setProcessingResult({
+        success: true,
+        message: `Confirmation email sent successfully.`,
+        isTemporary: false
+      });
+      
+      // Notify parent component
+      if (onComplete) {
+        onComplete(`Confirmation email sent successfully.`, 'email');
+      }
+    } catch (error) {
+      console.error('Error sending confirmation email:', error);
+      // Show error in UI
+      setProcessingError(`Failed to send confirmation email. ${error.message}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+  
   return (
     <div className="space-y-6 w-full">
       {processingError && (
@@ -325,7 +365,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       {/* Complete Reprocessing Option */}
       <Button 
         onClick={handleReprocessComplete} 
-        disabled={isProcessing}
+        disabled={isProcessing || isSendingEmail}
         className="w-full mt-4"
         size="lg"
       >
@@ -333,6 +373,21 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
           <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reprocessing...</>
         ) : (
           <><RefreshCw className="mr-2 h-4 w-4" /> Reprocess Entire Appraisal</>
+        )}
+      </Button>
+      
+      {/* Send Confirmation Email Button */}
+      <Button 
+        onClick={handleSendConfirmationEmail} 
+        disabled={isProcessing || isSendingEmail}
+        className="w-full mt-4"
+        variant="outline"
+        size="lg"
+      >
+        {isSendingEmail ? (
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending Email...</>
+        ) : (
+          <><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-4 w-4"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg> Send Confirmation Email to Customer</>
         )}
       </Button>
     </div>
