@@ -7,6 +7,7 @@ import BulkAppraisalPage from './pages/BulkAppraisalPage';
 import CompletedAppraisalPage from './pages/CompletedAppraisalPage';
 import NewAppraisalPage from './pages/NewAppraisalPage';
 import LoginPage from './pages/LoginPage';
+import ReprocessAppraisalPage from './pages/ReprocessAppraisalPage';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         {/* New routes with ID parameters */}
         <Route path="/appraisals/pending/:id" element={<AppraisalPage />} />
         <Route path="/appraisals/completed/:id" element={<CompletedAppraisalPage />} />
+        <Route path="/appraisals/reprocess/:id" element={<ReprocessAppraisalPage />} />
         <Route path="/new-appraisal" element={<NewAppraisalPage />} />
         
         {/* Keep edit and bulk routes (assuming they might need separate logic or already use query params) */}

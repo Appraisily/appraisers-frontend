@@ -13,7 +13,8 @@ import BackButton from '../components/BackButton';
 import { ENDPOINTS } from '../config/endpoints';
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Recycle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const AppraisalPage = () => {
   const { id: appraisalId } = useParams();
@@ -190,6 +191,18 @@ const AppraisalPage = () => {
           )}
           
           <div className="space-y-8">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-semibold">Pending Appraisal</h1>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => navigate(`/appraisals/reprocess/${appraisalId}`)}
+              >
+                <Recycle className="h-4 w-4" />
+                Reprocess Appraisal
+              </Button>
+            </div>
+            
             <AppraisalDetails appraisalData={appraisalData} />
 
             {(appraisalData.customerDescription || appraisalData.iaDescription) && (
