@@ -69,6 +69,12 @@ const ManualAppraisalForm = ({ appraisalId, customerData, onSuccess }) => {
         }
       });
 
+      // Add very explicit console logging for debugging
+      console.log('SESSION ID BEING SENT:', customerData.sessionId);
+      if (!customerData.sessionId) {
+        console.warn('WARNING: No session ID found in customerData, sending empty string');
+      }
+
       const response = await fetch('https://payment-processor-856401495068.us-central1.run.app/api/appraisals', {
         method: 'POST',
         body: formPayload,
@@ -98,6 +104,13 @@ const ManualAppraisalForm = ({ appraisalId, customerData, onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Debug information */}
+      <div className="bg-slate-50 p-3 rounded-md mb-4 text-xs">
+        <p className="text-slate-500">
+          <strong>Session ID:</strong> {customerData.sessionId || 'Not set'}
+        </p>
+      </div>
+      
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

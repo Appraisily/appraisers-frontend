@@ -224,13 +224,16 @@ const AppraisalPage = () => {
                           'No WordPress post information available. Please upload images and enter details manually.'
                         )}
                       </p>
+                      <p className="text-xs mt-2 text-muted-foreground">
+                        Identifier: {appraisalData?.identifier || 'Not available'}
+                      </p>
                     </div>
                     <ManualAppraisalForm
                       appraisalId={appraisalId}
                       customerData={{
                         email: appraisalData?.customerEmail || '',
                         name: appraisalData?.customerName || '',
-                        sessionId: appraisalData?.sessionId || '' 
+                        sessionId: appraisalData?.identifier || '' 
                       }}
                       onSuccess={handleSuccess}
                     />
