@@ -161,7 +161,7 @@ const Dashboard = () => {
       // Show success message
       setCleanupMessage({
         type: 'success',
-        text: `${result.cleanedCount} "Moved to Completed" entries have been removed.`
+        text: `${result.cleanedCount} "Moved to Completed" entries have been deleted from the list.`
       });
       
       // Reload the list
