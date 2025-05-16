@@ -304,3 +304,19 @@ export const sendConfirmationEmail = async (id) => {
     throw new Error(error.message || 'Failed to send confirmation email');
   }
 };
+
+// New method to create an appraisal
+export const createAppraisal = async (formData) => {
+  try {
+    console.log('Creating new appraisal with form data');
+    const response = await api.post(ENDPOINTS.APPRAISALS.NEW_APPRAISAL, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating new appraisal:', error);
+    throw new Error(error.message || 'Failed to create new appraisal');
+  }
+};
