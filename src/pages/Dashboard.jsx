@@ -24,6 +24,10 @@ const Dashboard = () => {
   const [itemsPerPage] = useState(10);
   const [cleaningList, setCleaningList] = useState(false);
   const [cleanupMessage, setCleanupMessage] = useState(null);
+  const [sortConfig, setSortConfig] = useState({
+    key: 'date',
+    direction: currentAppraisalType === 'completed' ? 'desc' : 'asc'
+  });
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
 
@@ -39,7 +43,57 @@ const Dashboard = () => {
   useEffect(() => {
     // Reset to first page when changing appraisal type
     setCurrentPage(1);
+    
+    // Set default sort direction based on appraisal type
+    setSortConfig({
+      key: 'date',
+      direction: currentAppraisalType === 'completed' ? 'desc' : 'asc'
+    });
   }, [currentAppraisalType]);
+
+  // Apply sorting to all appraisals
+  useEffect(() => {
+    if (allAppraisals.length > 0) {
+      const sorted = sortAppraisals([...allAppraisals], sortConfig);
+      setAppraisalsList(sorted);
+      setCurrentPage(1); // Reset to first page when sorting
+    }
+  }, [sortConfig, allAppraisals]);
+
+  const sortAppraisals = (appraisals, config) => {
+    return [...appraisals].sort((a, b) => {
+      const key = config.key;
+      let valA, valB;
+      
+      if (key === 'customer_name') {
+        valA = a.customer_name || a.customerName || a.metadata?.customer_name;
+        valB = b.customer_name || b.customerName || b.metadata?.customer_name;
+      } else if (key === 'status') {
+        valA = a.status || a.metadata?.appraisal_status;
+        valB = b.status || b.metadata?.appraisal_status;
+      } else if (key === 'date') {
+        valA = a.date || a.createdAt || a.metadata?.created_at;
+        valB = b.date || b.createdAt || b.metadata?.created_at;
+      } else if (key === 'name') {
+        valA = a.name || a.metadata?.title;
+        valB = b.name || b.metadata?.title;
+      } else {
+        valA = a[key];
+        valB = b[key];
+      }
+
+      valA = valA ?? '';
+      valB = valB ?? '';
+
+      if (valA < valB) {
+        return config.direction === 'asc' ? -1 : 1;
+      }
+      if (valA > valB) {
+        return config.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
 
   const loadAppraisals = async (type) => {
     try {
@@ -51,22 +105,14 @@ const Dashboard = () => {
         appraisalService.getPending()
       );
 
-      // Sort the appraisals based on type:
-      // - Completed appraisals: Most recent first (newest to oldest)
-      // - Pending appraisals: Oldest first (oldest to newest)
-      const sortedData = [...data].sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        
-        if (type === 'completed') {
-          return dateB - dateA; // Most recent first for completed
-        } else {
-          return dateA - dateB; // Oldest first for pending
-        }
+      // Set initial default sorting
+      const sortedData = sortAppraisals([...data], {
+        key: 'date',
+        direction: type === 'completed' ? 'desc' : 'asc'
       });
 
-      setAppraisalsList(sortedData);
-      setAllAppraisals(sortedData);
+      setAllAppraisals(data); // Store original unsorted data
+      setAppraisalsList(sortedData); // Store sorted data for display
       setCurrentPage(1); // Reset to first page when loading new data
     } catch (err) {
       console.error('Error loading appraisals:', err);
@@ -76,9 +122,19 @@ const Dashboard = () => {
     }
   };
 
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
   const handleSearch = (query) => {
     if (!query.trim()) {
-      setAppraisalsList(allAppraisals);
+      // Reset to sorted all appraisals
+      const sorted = sortAppraisals([...allAppraisals], sortConfig);
+      setAppraisalsList(sorted);
       setCurrentPage(1); // Reset to first page when clearing search
       return;
     }
@@ -90,7 +146,9 @@ const Dashboard = () => {
         .includes(query.toLowerCase())
     );
 
-    setAppraisalsList(filteredAppraisals);
+    // Apply current sorting to filtered results
+    const sortedFiltered = sortAppraisals(filteredAppraisals, sortConfig);
+    setAppraisalsList(sortedFiltered);
     setCurrentPage(1); // Reset to first page on new search
   };
 
@@ -217,6 +275,8 @@ const Dashboard = () => {
                   navigate(`/edit-appraisal?${params.toString()}`);
                 }
               }}
+              onSort={handleSort}
+              sortConfig={sortConfig}
             />
           )}
           

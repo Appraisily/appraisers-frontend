@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table,
@@ -13,12 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, CheckCircle, ArrowUpDown, Calendar, User, FileText, Settings, Clipboard, Eye } from "lucide-react";
 import { parseDate, getRelativeTime } from '../utils/dateUtils';
 
-const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) => {
+const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSort, sortConfig }) => {
   const navigate = useNavigate();
-  const [sortConfig, setSortConfig] = useState({
-    key: 'date',
-    direction: 'desc'
-  });
 
   if (!appraisals || appraisals.length === 0) {
     return (
@@ -52,41 +48,12 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
     }
   };
 
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return <ArrowUpDown className="h-4 w-4" />;
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUpDown className="h-4 w-4 text-primary" /> 
+      : <ArrowUpDown className="h-4 w-4 text-primary rotate-180" />;
   };
-
-  const sortedAppraisals = [...appraisals].sort((a, b) => {
-    const key = sortConfig.key;
-    let valA = a[key];
-    let valB = b[key];
-
-    if (key === 'customer_name') {
-      valA = a.customer_name || a.customerName || a.metadata?.customer_name;
-      valB = b.customer_name || b.customerName || b.metadata?.customer_name;
-    } else if (key === 'status') {
-      valA = a.status || a.metadata?.appraisal_status;
-      valB = b.status || b.metadata?.appraisal_status;
-    } else if (key === 'date') {
-      valA = a.date || a.createdAt || a.metadata?.created_at;
-      valB = b.date || b.createdAt || b.metadata?.created_at;
-    }
-
-    valA = valA ?? '';
-    valB = valB ?? '';
-
-    if (valA < valB) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
-    }
-    if (valA > valB) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
 
   const viewAppraisal = (id) => {
     if (!id) return;
@@ -168,9 +135,9 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               </div>
             </TableHead>
             <TableHead className="min-w-[150px]">
-              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleSort('name')}>
+              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('name')}>
                 <span>Name/Type</span>
-                <ArrowUpDown className="h-4 w-4" />
+                {getSortIcon('name')}
               </div>
             </TableHead>
             <TableHead>
@@ -179,30 +146,30 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick }) =>
               </div>
             </TableHead>
             <TableHead className="w-[120px]">
-              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleSort('status')}>
+              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('status')}>
                 <span>Status</span>
-                <ArrowUpDown className="h-4 w-4" />
+                {getSortIcon('status')}
               </div>
             </TableHead>
             <TableHead className="w-[140px]">
-              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleSort('date')}>
+              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('date')}>
                 <Calendar className="h-4 w-4" />
                 <span>Date</span>
-                <ArrowUpDown className="h-4 w-4" />
+                {getSortIcon('date')}
               </div>
             </TableHead>
             <TableHead className="min-w-[150px]">
-               <div className="flex items-center space-x-1 cursor-pointer" onClick={() => handleSort('customer_name')}>
+               <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('customer_name')}>
                  <User className="h-4 w-4" />
                  <span>Customer</span>
-                 <ArrowUpDown className="h-4 w-4" />
+                 {getSortIcon('customer_name')}
                </div>
             </TableHead>
             <TableHead className="text-right min-w-[150px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedAppraisals.map((appraisal) => {
+          {appraisals.map((appraisal) => {
             const description = appraisal.description || 
                               appraisal.iaDescription || 
                               appraisal.customerDescription || 
