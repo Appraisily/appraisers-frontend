@@ -320,3 +320,14 @@ export const createAppraisal = async (formData) => {
     throw new Error(error.message || 'Failed to create new appraisal');
   }
 };
+
+export const removeAppraisal = async (id) => {
+  try {
+    console.log(`Removing appraisal with ID: ${id}`);
+    const response = await api.post(ENDPOINTS.APPRAISALS.REMOVE(id));
+    return response.data;
+  } catch (error) {
+    console.error('Error removing appraisal:', error);
+    throw new Error(error.message || 'Failed to remove appraisal');
+  }
+};

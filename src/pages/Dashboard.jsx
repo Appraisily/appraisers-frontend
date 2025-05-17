@@ -28,6 +28,7 @@ const Dashboard = () => {
     key: 'date',
     direction: currentAppraisalType === 'completed' ? 'desc' : 'asc'
   });
+  const [removingAppraisalId, setRemovingAppraisalId] = useState(null);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
 
@@ -161,7 +162,7 @@ const Dashboard = () => {
       // Show success message
       setCleanupMessage({
         type: 'success',
-        text: `${result.cleanedCount} "Moved to Completed" entries have been deleted from the list.`
+        text: `${result.cleanedCount} "Moved to Completed" or "REMOVED" entries have been deleted from the list.`
       });
       
       // Reload the list
@@ -174,6 +175,28 @@ const Dashboard = () => {
       });
     } finally {
       setCleaningList(false);
+    }
+  };
+
+  const handleRemoveAppraisal = async (id) => {
+    if (!id) return;
+    
+    // Confirm before removal
+    if (!window.confirm('Are you sure you want to remove this appraisal? It will be moved to the "Removed Appraisals" sheet.')) {
+      return;
+    }
+    
+    setRemovingAppraisalId(id);
+    
+    try {
+      await appraisalService.removeAppraisal(id);
+      // Reload the appraisals list
+      await loadAppraisals(currentAppraisalType);
+      setRemovingAppraisalId(null);
+    } catch (error) {
+      console.error('Error removing appraisal:', error);
+      setError(`Failed to remove appraisal: ${error.message}`);
+      setRemovingAppraisalId(null);
     }
   };
 
@@ -216,7 +239,7 @@ const Dashboard = () => {
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4" /> 
-                    Clean "Moved to Completed"
+                    Clean "Moved to Completed" & "REMOVED"
                   </>
                 )}
               </Button>
@@ -277,6 +300,7 @@ const Dashboard = () => {
               }}
               onSort={handleSort}
               sortConfig={sortConfig}
+              onRemove={handleRemoveAppraisal}
             />
           )}
           
@@ -295,6 +319,16 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+
+      {/* Loading overlay for when removing an appraisal */}
+      {removingAppraisalId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <LoadingSpinner />
+            <p className="mt-4 text-center">Removing appraisal...</p>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -29,6 +29,7 @@ export const ENDPOINTS = {
     PROCESS_FROM_STEP: (id) => `/api/appraisals/${id}/process-from-step`,
     REPROCESS_COMPLETED: (id) => `/api/appraisals/${id}/reprocess-completed`,
     SEND_CONFIRMATION_EMAIL: (id) => `/api/appraisals/${id}/send-confirmation-email`,
-    NEW_APPRAISAL: '/api/appraisals/new'
+    NEW_APPRAISAL: '/api/appraisals/new',
+    REMOVE: (id) => `/api/appraisals/${id}/remove`
   }
 };

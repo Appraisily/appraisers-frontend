@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, CheckCircle, ArrowUpDown, Calendar, User, FileText, Settings, Clipboard, Eye } from "lucide-react";
+import { Edit, CheckCircle, ArrowUpDown, Calendar, User, FileText, Settings, Clipboard, Eye, Trash2 } from "lucide-react";
 import { parseDate, getRelativeTime } from '../utils/dateUtils';
 
-const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSort, sortConfig }) => {
+const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSort, sortConfig, onRemove }) => {
   const navigate = useNavigate();
 
   if (!appraisals || appraisals.length === 0) {
@@ -89,14 +89,28 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
         </Button>
         
         {isPending && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => editAppraisal(appraisal.id)}
-            title="Edit Appraisal"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => editAppraisal(appraisal.id)}
+              title="Edit Appraisal"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onRemove) onRemove(appraisal.id);
+              }}
+              title="Remove Appraisal"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </>
         )}
         
         {isCompleted && (
