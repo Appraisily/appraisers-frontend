@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Edit, CheckCircle, ArrowUpDown, Calendar, User, FileText, Settings, Clipboard, Eye, Trash2 } from "lucide-react";
 import { parseDate, getRelativeTime } from '../utils/dateUtils';
 
-const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSort, sortConfig, onRemove }) => {
+const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSort, sortConfig, onRemove, onMoveToCompleted }) => {
   const navigate = useNavigate();
 
   if (!appraisals || appraisals.length === 0) {
@@ -104,6 +104,18 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
+                if (onMoveToCompleted) onMoveToCompleted(appraisal.id);
+              }}
+              title="Move to Completed"
+            >
+              <CheckCircle className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
                 if (onRemove) onRemove(appraisal.id);
               }}
               title="Remove Appraisal"
@@ -129,9 +141,9 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
             variant="outline"
             size="sm"
             onClick={() => window.open(appraisal.links.admin, '_blank')}
-            title="Open WordPress Admin"
+            title="Edit in WordPress"
           >
-            <Clipboard className="h-4 w-4" />
+            <FileText className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -139,107 +151,128 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
   };
 
   return (
-    <div className="border rounded-lg shadow-sm overflow-x-auto">
+    <div className="rounded-md border shadow-elevation-1">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">
-              <div className="flex items-center space-x-1">
-                <span>ID</span>
-              </div>
-            </TableHead>
-            <TableHead className="min-w-[150px]">
-              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('name')}>
-                <span>Name/Type</span>
-                {getSortIcon('name')}
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="flex items-center space-x-1">
-                <span>Description</span>
-              </div>
-            </TableHead>
             <TableHead className="w-[120px]">
-              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('status')}>
-                <span>Status</span>
-                {getSortIcon('status')}
-              </div>
+              <Button 
+                variant="ghost" 
+                className="font-medium hover:bg-transparent hover:underline px-0 flex items-center" 
+                onClick={() => onSort('date')}
+              >
+                Date {getSortIcon('date')}
+              </Button>
             </TableHead>
-            <TableHead className="w-[140px]">
-              <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('date')}>
-                <Calendar className="h-4 w-4" />
-                <span>Date</span>
-                {getSortIcon('date')}
-              </div>
+            
+            <TableHead>
+              <Button 
+                variant="ghost" 
+                className="font-medium hover:bg-transparent hover:underline px-0 flex items-center" 
+                onClick={() => onSort('type')}
+              >
+                Type {getSortIcon('type')}
+              </Button>
             </TableHead>
-            <TableHead className="min-w-[150px]">
-               <div className="flex items-center space-x-1 cursor-pointer" onClick={() => onSort('customer_name')}>
-                 <User className="h-4 w-4" />
-                 <span>Customer</span>
-                 {getSortIcon('customer_name')}
-               </div>
+            
+            <TableHead>
+              <Button 
+                variant="ghost" 
+                className="font-medium hover:bg-transparent hover:underline px-0 flex items-center" 
+                onClick={() => onSort('status')}
+              >
+                Status {getSortIcon('status')}
+              </Button>
             </TableHead>
-            <TableHead className="text-right min-w-[150px]">Actions</TableHead>
+            
+            <TableHead>
+              <Button 
+                variant="ghost" 
+                className="font-medium hover:bg-transparent hover:underline px-0 flex items-center" 
+                onClick={() => onSort('customer')}
+              >
+                Customer {getSortIcon('customer')}
+              </Button>
+            </TableHead>
+            
+            <TableHead className="hidden md:table-cell">Description</TableHead>
+            
+            <TableHead className="hidden sm:table-cell">
+              <Button 
+                variant="ghost" 
+                className="font-medium hover:bg-transparent hover:underline px-0 flex items-center" 
+                onClick={() => onSort('id')}
+              >
+                ID {getSortIcon('id')}
+              </Button>
+            </TableHead>
+            
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
+        
         <TableBody>
-          {appraisals.map((appraisal) => {
-            const description = appraisal.description || 
-                              appraisal.iaDescription || 
-                              appraisal.customerDescription || 
-                              appraisal.appraisersDescription || 
-                              appraisal.metadata?.description || 
-                              appraisal.metadata?.iaDescription ||
-                              appraisal.metadata?.customer_description ||
-                              appraisal.metadata?.appraiser_description || 
-                              'No description available';
-            const customerName = appraisal.customer_name || appraisal.customerName || appraisal.metadata?.customer_name || 'Unknown';
-            const status = appraisal.status || appraisal.metadata?.appraisal_status || 'Unknown';
-            const date = appraisal.date || appraisal.createdAt || appraisal.metadata?.created_at;
-            const appraisalId = appraisal.id || appraisal.postId;
-
-            return (
-              <TableRow 
-                key={appraisalId} 
-                className="hover:bg-muted/50 cursor-pointer"
-                onClick={() => viewAppraisal(appraisalId)}
-              >
-                <TableCell className="font-mono text-xs">
-                  {getShortId(appraisal.identifier || appraisalId)}
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium">{appraisal.name || appraisal.metadata?.title || 'Unnamed'}</div>
-                  <div className="text-xs text-muted-foreground">{appraisal.type || appraisal.metadata?.object_type || 'Standard'}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm truncate max-w-[280px]" title={description}>
-                    {description}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {getStatusBadge(status)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="text-xs">
-                      {date ? parseDate(date)?.toLocaleDateString() : 'N/A'}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {date ? getRelativeTime(date) : ''}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
+          {appraisals.map((appraisal) => (
+            <TableRow 
+              key={appraisal.id}
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => onActionClick ? onActionClick(appraisal) : viewAppraisal(appraisal.id)}
+            >
+              <TableCell className="font-medium">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span>
+                    {parseDate(appraisal.date)?.toLocaleDateString() || 'N/A'}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {getRelativeTime(appraisal.date)}
+                </div>
+              </TableCell>
+              
+              <TableCell>
+                {appraisal.type || appraisal.appraisalType || 'Standard'}
+              </TableCell>
+              
+              <TableCell>
+                {getStatusBadge(appraisal.status)}
+              </TableCell>
+              
+              <TableCell>
+                <div className="flex flex-col">
                   <div className="flex items-center space-x-2">
-                    <span title={customerName}>{customerName}</span>
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {appraisal.customerName || appraisal.customer_name || 'Unknown'}
+                    </span>
                   </div>
-                </TableCell>
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                  {getActionButtons(appraisal)}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                  {appraisal.customerEmail && (
+                    <div className="text-xs text-muted-foreground">
+                      {appraisal.customerEmail}
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              
+              <TableCell className="max-w-[300px] hidden md:table-cell">
+                <div className="truncate">
+                  {appraisal.description || 'No description available'}
+                </div>
+              </TableCell>
+              
+              <TableCell className="hidden sm:table-cell">
+                <div className="font-mono text-xs">
+                  <span className="px-2 py-1 rounded bg-muted">
+                    {getShortId(appraisal.identifier) || appraisal.id}
+                  </span>
+                </div>
+              </TableCell>
+              
+              <TableCell className="text-right">
+                {getActionButtons(appraisal)}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

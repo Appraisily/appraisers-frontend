@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import './Dashboard.css';
+import { toast } from '@/components/ui/use-toast';
 
 const Dashboard = () => {
   const [appraisalsList, setAppraisalsList] = useState([]);
@@ -200,6 +201,38 @@ const Dashboard = () => {
     }
   };
 
+  const handleMoveToCompleted = async (id) => {
+    try {
+      if (!confirm('Are you sure you want to move this appraisal to the completed sheet?')) {
+        return;
+      }
+      
+      setLoading(true);
+      await appraisalService.moveToCompleted(id);
+      
+      // Show success notification
+      toast({
+        title: "Success",
+        description: "Appraisal moved to completed successfully",
+        variant: "success"
+      });
+      
+      // Refresh the list after moving
+      loadAppraisals(currentAppraisalType);
+    } catch (error) {
+      console.error('Error moving appraisal to completed:', error);
+      
+      // Show error notification
+      toast({
+        title: "Error",
+        description: error.message || "Failed to move appraisal to completed",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Get current page items
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -301,6 +334,7 @@ const Dashboard = () => {
               onSort={handleSort}
               sortConfig={sortConfig}
               onRemove={handleRemoveAppraisal}
+              onMoveToCompleted={handleMoveToCompleted}
             />
           )}
           

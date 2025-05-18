@@ -118,7 +118,7 @@ const CompletedAppraisalPage = () => {
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    navigate('/');
   };
 
   if (loading) {

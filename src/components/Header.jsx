@@ -20,7 +20,7 @@ const Header = () => {
   };
 
   const handleHome = () => {
-    navigate('/dashboard');
+    navigate('/');
   };
 
   return (

@@ -94,7 +94,7 @@ const ReprocessAppraisalPage = () => {
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    navigate('/');
   };
   
   const handleBackToPending = () => {

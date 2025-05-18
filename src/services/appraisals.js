@@ -117,6 +117,16 @@ export const updatePendingAppraisal = async (data) => {
   }
 };
 
+export const moveToCompleted = async (id) => {
+  try {
+    const response = await api.post(`${ENDPOINTS.APPRAISALS.MOVE_TO_COMPLETED(id)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error moving appraisal to completed:', error);
+    throw new Error(error.message || 'Failed to move appraisal to completed');
+  }
+};
+
 export const setValue = async (id, appraisalValue, description, isEdit) => {
   try {
     const response = await api.post(ENDPOINTS.APPRAISALS.SET_VALUE(id), {

@@ -8,6 +8,7 @@ import CompletedAppraisalPage from './pages/CompletedAppraisalPage';
 import NewAppraisalPage from './pages/NewAppraisalPage';
 import LoginPage from './pages/LoginPage';
 import ReprocessAppraisalPage from './pages/ReprocessAppraisalPage';
+import { Toaster } from '@/components/ui/use-toast';
 import './App.css';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         {/* Optional: Add a redirect or not found page for the old routes if needed */}
 
       </Routes>
+      <Toaster />
     </div>
   );
 }
