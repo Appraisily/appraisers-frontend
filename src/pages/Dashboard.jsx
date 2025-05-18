@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import './Dashboard.css';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/use-toast.jsx';
 
 const Dashboard = () => {
   const [appraisalsList, setAppraisalsList] = useState([]);
