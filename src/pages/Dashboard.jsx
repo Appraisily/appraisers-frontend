@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import './Dashboard.css';
-import { toast } from '@/components/ui/use-toast.jsx';
+import { useToast } from '@/components/ui/use-toast.jsx';
 
 const Dashboard = () => {
   const [appraisalsList, setAppraisalsList] = useState([]);
@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [removingAppraisalId, setRemovingAppraisalId] = useState(null);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
+  const { toast } = useToast();
 
   useEffect(() => {
     if (checkAuth()) {
