@@ -304,10 +304,13 @@ export const cleanupMovedToCompleted = async () => {
 };
 
 // New method to send confirmation email
-export const sendConfirmationEmail = async (id) => {
+export const sendConfirmationEmail = async (id, sessionId) => {
   try {
     console.log(`Sending confirmation email for appraisal ${id}`);
-    const response = await api.post(ENDPOINTS.APPRAISALS.SEND_CONFIRMATION_EMAIL(id));
+    const response = await api.post(
+      ENDPOINTS.APPRAISALS.SEND_CONFIRMATION_EMAIL(id),
+      { sessionId }
+    );
     return response.data;
   } catch (error) {
     console.error('Error sending confirmation email:', error);

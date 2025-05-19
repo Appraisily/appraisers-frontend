@@ -275,7 +275,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       console.log(`Sending confirmation email for appraisal ${appraisalId}`);
       
       // Call API to send the email
-      const response = await appraisalService.sendConfirmationEmail(appraisalId);
+      const response = await appraisalService.sendConfirmationEmail(appraisalId, appraisal?.identifier || '');
       
       setProcessingResult({
         success: true,
