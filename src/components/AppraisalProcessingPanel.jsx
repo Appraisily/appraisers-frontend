@@ -162,7 +162,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       console.log(`Reprocessing step ${backendStepId} for appraisal ${appraisalId}`);
       
       // Call API in the background with the actual backend step
-      appraisalService.reprocessStep(appraisalId, backendStepId)
+      appraisalService.reprocessStep(appraisalId, backendStepId, appraisal?.identifier || '')
         .then(response => {
           // For all steps, don't refresh the page, just show notification that processing was initiated
           setProcessingResult({
@@ -235,7 +235,7 @@ const AppraisalProcessingPanel = ({ appraisalId, appraisal, onComplete }) => {
       console.log(`Initiating complete reprocessing for appraisal ${appraisalId}`);
       
       // Start reprocessing in the background
-      appraisalService.reprocessCompletedAppraisal(appraisalId)
+      appraisalService.reprocessCompletedAppraisal(appraisalId, appraisal?.identifier || '')
         .then(response => {
           if (onComplete) {
             // Pass special value to indicate complete reprocessing

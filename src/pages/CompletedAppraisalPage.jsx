@@ -91,7 +91,7 @@ const CompletedAppraisalPage = () => {
       console.log(`Initiating complete reprocessing for appraisal ${appraisalId}`);
       // Add additional logging to help diagnose issues
       try {
-        const response = await appraisalService.reprocessCompletedAppraisal(appraisalId);
+        const response = await appraisalService.reprocessCompletedAppraisal(appraisalId, appraisal?.identifier || '');
         
         if (response && response.success) {
           setSuccessMessage('Appraisal reprocessing initiated. This may take a few minutes. Refreshing details...');

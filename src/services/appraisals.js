@@ -233,10 +233,11 @@ export const processFromStep = async (id, startStep, options) => {
   }
 };
 
-export const reprocessStep = async (id, stepName) => {
+export const reprocessStep = async (id, stepName, sessionId) => {
   try {
     const response = await api.post(ENDPOINTS.APPRAISALS.REPROCESS_STEP(id), {
-      stepName
+      stepName,
+      sessionId
     });
     return response.data;
   } catch (error) {
@@ -264,7 +265,7 @@ export const getBySessionId = async (sessionId) => {
 };
 
 // New function to reprocess a completed appraisal
-export const reprocessCompletedAppraisal = async (id) => {
+export const reprocessCompletedAppraisal = async (id, sessionId) => {
   try {
     console.log(`Initiating complete reprocessing for appraisal ${id}`);
     
@@ -281,6 +282,7 @@ export const reprocessCompletedAppraisal = async (id) => {
     // Use the first step in the processing flow to restart the entire process
     const response = await api.post(endpoint, {
       startStep: 'STEP_SET_VALUE', // Using the correct step name format from backend
+      sessionId,
       options: {
         reprocessStatistics: true,
         regeneratePdf: true
