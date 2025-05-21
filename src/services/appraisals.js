@@ -346,3 +346,14 @@ export const removeAppraisal = async (id) => {
     throw new Error(error.message || 'Failed to remove appraisal');
   }
 };
+
+export const reprocessByPostId = async (postId) => {
+  try {
+    console.log(`Reprocessing appraisal with WordPress post ID: ${postId}`);
+    const response = await api.post(ENDPOINTS.APPRAISALS.REPROCESS_BY_POST(postId));
+    return response.data;
+  } catch (error) {
+    console.error('Error reprocessing appraisal by post ID:', error);
+    throw new Error(error.message || 'Failed to reprocess appraisal by post ID');
+  }
+};

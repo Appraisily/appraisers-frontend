@@ -31,6 +31,7 @@ export const ENDPOINTS = {
     REPROCESS_COMPLETED: (id) => `/api/appraisals/${id}/reprocess-completed`,
     SEND_CONFIRMATION_EMAIL: (id) => `/api/appraisals/${id}/send-confirmation-email`,
     NEW_APPRAISAL: '/api/appraisals/new',
-    REMOVE: (id) => `/api/appraisals/${id}/remove`
+    REMOVE: (id) => `/api/appraisals/${id}/remove`,
+    REPROCESS_BY_POST: (postId) => `/api/appraisals/reprocess-by-post/${postId}`
   }
 };

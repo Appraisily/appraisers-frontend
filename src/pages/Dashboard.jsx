@@ -328,6 +328,8 @@ const Dashboard = () => {
                   navigate(`/bulk-appraisal?id=${appraisal.id}`);
                 } else if (currentAppraisalType === 'pending') {
                   navigate(`/appraisals/pending/${appraisal.id}`);
+                } else if (currentAppraisalType === 'completed') {
+                  navigate(`/appraisals/completed/${appraisal.id}`);
                 } else {
                   navigate(`/edit-appraisal?${params.toString()}`);
                 }

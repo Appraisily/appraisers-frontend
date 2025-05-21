@@ -70,7 +70,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
 
   const processCompletedAppraisal = (id) => {
     if (!id) return;
-    viewAppraisal(id);
+    navigate(`/appraisals/completed/${id}`);
   };
 
   const getActionButtons = (appraisal) => {
@@ -129,7 +129,7 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
           <Button
             variant="outline"
             size="sm"
-            onClick={() => viewAppraisal(appraisal.id)}
+            onClick={() => navigate(`/appraisals/completed/${appraisal.id}`)}
             title="View Details / Process"
           >
             <Settings className="h-4 w-4" />
@@ -216,7 +216,16 @@ const AppraisalsTable = ({ appraisals, currentAppraisalType, onActionClick, onSo
             <TableRow 
               key={appraisal.id}
               className="cursor-pointer hover:bg-muted/50"
-              onClick={() => onActionClick ? onActionClick(appraisal) : viewAppraisal(appraisal.id)}
+              onClick={() => {
+                if (onActionClick) {
+                  onActionClick(appraisal);
+                } else {
+                  const path = currentAppraisalType === 'completed' 
+                    ? `/appraisals/completed/${appraisal.id}` 
+                    : `/appraisals/pending/${appraisal.id}`;
+                  navigate(path);
+                }
+              }}
             >
               <TableCell className="font-medium">
                 <div className="flex items-center space-x-2">
