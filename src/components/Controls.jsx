@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw, Plus, RefreshCcw } from "lucide-react";
 
 const Controls = ({ 
   currentAppraisalType, 
@@ -9,7 +9,8 @@ const Controls = ({
   onSearch,
   onRefresh,
   isRefreshing,
-  onNewAppraisal
+  onNewAppraisal,
+  onReprocessByPostId
 }) => {
   return (
     <div className="mb-6">
@@ -52,6 +53,16 @@ const Controls = ({
               className="w-[250px] h-8"
             />
           </div>
+          {onReprocessByPostId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onReprocessByPostId}
+              className="ml-2"
+            >
+              <RefreshCcw className="h-4 w-4 mr-1" /> Reprocess by Post ID
+            </Button>
+          )}
           {onNewAppraisal && (
             <Button
               variant="default"

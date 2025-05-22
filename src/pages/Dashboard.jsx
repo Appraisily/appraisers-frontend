@@ -8,6 +8,7 @@ import Controls from '../components/Controls';
 import AppraisalsTable from '../components/AppraisalsTable';
 import PaginationControls from '../components/PaginationControls';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ReprocessByPostIdModal from '../components/ReprocessByPostIdModal';
 import Logo from '../components/Logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ const Dashboard = () => {
     direction: currentAppraisalType === 'completed' ? 'desc' : 'asc'
   });
   const [removingAppraisalId, setRemovingAppraisalId] = useState(null);
+  const [isReprocessModalOpen, setIsReprocessModalOpen] = useState(false);
   const navigate = useNavigate();
   const userName = localStorage.getItem('userName');
   const { toast } = useToast();
@@ -234,6 +236,14 @@ const Dashboard = () => {
     }
   };
 
+  const handleOpenReprocessModal = () => {
+    setIsReprocessModalOpen(true);
+  };
+
+  const handleCloseReprocessModal = () => {
+    setIsReprocessModalOpen(false);
+  };
+
   // Get current page items
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -295,6 +305,7 @@ const Dashboard = () => {
             onTypeChange={setCurrentAppraisalType}
             onSearch={handleSearch}
             onNewAppraisal={() => navigate('/new-appraisal')}
+            onReprocessByPostId={handleOpenReprocessModal}
           />
           
           {loading && <LoadingSpinner />}
@@ -368,6 +379,11 @@ const Dashboard = () => {
       )}
 
       <Footer />
+      
+      <ReprocessByPostIdModal 
+        isOpen={isReprocessModalOpen} 
+        onClose={handleCloseReprocessModal} 
+      />
     </div>
   );
 };
